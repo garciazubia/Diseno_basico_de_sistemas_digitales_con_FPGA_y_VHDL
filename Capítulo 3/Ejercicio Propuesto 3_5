@@ -1,0 +1,97 @@
+# Problema 3.5
+# Una báscula dispone de cuatro sensores: SB, SA, SF, SG para medir la altura y el peso de una persona. 
+
+# Los sensores SA (sensor alto) y SB (sensor bajo) están situados de forma que pue-den estar activos para conocer la altura de una persona. 
+# Los sensores por defecto en-tregan un 1, excepto cuando la persona los intercepta, en cuyo caso entregan un 0. 
+# Una persona puede ser de estatura baja (no se intercepta ningún sensor), mediana (se intercepta solo SB) o alta (se interceptan los dos sensores).
+# Los sensores SF y SG se activan por peso. SF se activa si el peso es mayor de 60 kilos y SG se activa si el peso es mayor de 90 kilos. 
+# Así una persona puede tener poco peso, peso mediano y demasiado peso.
+
+# Se desea añadir a la báscula un display 7-segmentos de manera que sea un núme-ro indicador de su relación peso/estatura. 
+# El número a visualizar se encuentra en la siguiente tabla. Lo normal es ver un 2, por debajo de 2 la persona tiene poco peso para su estatura,
+# y por encima de 2 tiene demasiado peso.
+
+# TESTED 
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal SA: std_logic;
+signal SB: std_logic;
+signal SG: std_logic;
+signal SF: std_logic;
+signal seg: std_logic_vector (6 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+SA<=v_sw(3);
+SB<=v_sw(2);
+SG<=v_sw(1);
+SF<=v_sw(0);
+G_HEX0<=seg;
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+process(SA, SB, SG, SF)
+begin
+if SG='1' and SF='0' then --gordo
+    if SA='0' and SB='0' then
+        seg<="0010010";
+    elsif SA='1' and SB='0' then
+        seg<="0000110";
+    elsif SA='1' and SB='1' then
+        seg<="1001100";
+    else
+        seg<="-------";
+    end if;
+elsif SG='0' and SF='1' then --mediano
+    if SA='0' and SB='0' then
+        seg<="1001111";
+    elsif SA='1' and SB='0' then
+        seg<="0010010";
+    elsif SA='1' and SB='1' then
+        seg<="0000110";
+    else
+        seg<="-------";
+    end if;    
+elsif SG='0' and SF='0' then --mediano
+    if SA='0' and SB='0' then
+        seg<="0000001";
+    elsif SA='1' and SB='0' then
+        seg<="1001111";
+    elsif SA='1' and SB='1' then
+        seg<="0010010";
+    else
+        seg<="-------";
+    end if;    
+else
+    seg<="-------";
+end if;
+end process;
+
+end Behavioral;
