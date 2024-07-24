@@ -1,0 +1,84 @@
+# Ejemplo 4.13. Registro universal de 4 bits. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (6 downto 0);
+		G_HEX1 : out std_logic_vector (6 downto 0);
+		G_HEX2 : out std_logic_vector (6 downto 0);
+		G_HEX3 : out std_logic_vector (6 downto 0);
+		G_HEX4 : out std_logic_vector (6 downto 0);
+		G_HEX5 : out std_logic_vector (6 downto 0)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal entrada_paralelo: std_logic_vector(3 downto 0);
+signal entrada_serie_derecha: std_logic;
+signal entrada_serie_izquierda: std_logic;
+signal sel_reg: std_logic_vector (1 downto 0);
+signal enable_sal: std_logic;
+signal salida_paralelo: std_logic_vector(3 downto 0);
+signal salida_serie_derecha: std_logic;
+signal salida_serie_izquierda: std_logic;
+signal registro: std_logic_vector (3 downto 0) :="0000";
+signal clk: std_logic; 
+signal clear: std_logic;
+
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+entrada_paralelo<=v_sw(3 downto 0);
+entrada_serie_derecha<=v_sw(4);
+entrada_serie_izquierda<=v_sw(5);
+sel_reg<=v_sw(7 downto 6);
+enable_sal<=v_sw(8);
+clear<=not(v_bt(0));
+clk<=G_CLOCK_50;
+g_led(0)<=salida_serie_derecha;
+g_led(5)<=salida_serie_izquierda;
+g_led(4 downto 1)<=salida_paralelo;
+--fin de asignación de signals, entradas y salidas
+
+--comienzan los process
+process(clear, clk)
+begin
+if clear='1' then
+    registro<="0000";
+elsif rising_edge(clk) then
+    case sel_reg is
+    when "00" => registro<=entrada_paralelo;
+    when "01" => registro<=registro(2 downto 0)&entrada_serie_derecha;
+    when "10" => registro<=entrada_serie_izquierda&registro(3 downto 1);
+    when "11" => registro<=registro;
+    end case;
+end if;
+end process;
+
+process(enable_sal, registro)
+begin
+if enable_sal='0' then
+    salida_serie_izquierda<='Z';
+    salida_serie_derecha<='Z';
+    salida_paralelo<="ZZZZ";
+else
+    salida_serie_izquierda<=registro(3);
+    salida_serie_derecha<=registro(0);
+    salida_paralelo<=registro;
+end if;
+end process;
+
+end Behavioral;
