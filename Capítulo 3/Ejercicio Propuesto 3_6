@@ -1,0 +1,84 @@
+# Problema 3.6
+# Un sistema industrial tiene cuatro sensores, S3, S2, S1 y S0, que pueden entregar cada uno de ellos un 0 o un 1. Se desea visualizar en un led el valor obtenido por la mayoría de los sensores, ya sea 0 o 1. Para que no haya empates se ha comprado el sensor S3 de mayor calidad, así que en caso necesario su valor será determinante. Además, un 7-segmentos debe visualizar determinadas situaciones según el siguiente código de rayas:
+# •	Si todos los sensores indican el mismo valor, en el display 7-segmentos no se activará ningún segmento.
+# •	Si hay mayoría de un valor, pero no hay unanimidad, entonces se activa el segmento d del display 7-segmentos.
+# •	Si hay empate en el número de sensores activos o inactivos, entonces en el display 7-segmentos se activará el segmento g.
+# •	Además, se quiere activar el segmento a en el caso de que el valor de S3 dis-crepe del valor de los otros tres sensores.
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal sensores: std_logic_vector(3 downto 0);
+signal sensor_salida: std_logic;
+signal seg_a: std_logic;
+signal seg_d: std_logic;
+signal seg_g: std_logic;
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+sensores<=v_sw(3 downto 0);
+g_led(0)<=sensor_salida;
+G_HEX0<=seg_a&"11"&seg_d&"11"&seg_g;
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+process(sensores)
+begin 
+case sensores is
+when "0000" | "1000" | "0001" | "0100" | "0010" | "0011" | "0101" | "0110" => sensor_salida<='0';
+when others => sensor_salida<='1'; --"1111" | "0111" | "1110" | "1011" | "1101" | "1100" | "1010" | "1001" 
+end case;
+end process;
+
+process(sensores)
+begin
+case sensores is
+when "0001" | "0010" | "0100" | "1000" | "1110" | "1101" | "1011" | "0111" => seg_d<='0';
+when others => seg_d<='1';
+end case;
+end process;
+
+process(sensores)
+begin
+case sensores is
+when "0011" | "0110" | "0101" | "1100" | "1001" | "1010" => seg_g<='0';
+when others => seg_g<='1';
+end case;
+end process;
+
+process(sensores)
+begin
+case sensores is
+when "0111" | "1000" => seg_a<='0';
+when others => seg_a<='1';
+end case;
+end process;
+
+end Behavioral;
