@@ -1,0 +1,102 @@
+# Ejemplo 3.24. Disponemos de las notas, N1 y N0, de un alumno codificadas en BCD (la nota no puede ser 10). 
+# Diseñar el circuito que obtiene la nota final según las preferencias del profesor expresadas con las líneas de control C1C0:
+# •	C1C0=00 Nota media redondeada por defecto.
+# •	C1C0=01 Nota mínima.
+# •	C1C0=10 Nota máxima.
+# •	C1C0=11 Nota media redondeada por exceso.
+# La nota se visualizará en un 7-segmentos. Si la nota fuera 10, se verá una H de matrícula de honor.
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal n1: std_logic_vector (3 downto 0);
+signal n2: std_logic_vector (3 downto 0);
+signal sel: std_logic_vector(1 downto 0);
+signal n1_entero: integer range 0 to 9:
+signal n2_entero: integer range 0 to 9:
+signal nota_maxima: integer range 0 to 9:
+signal nota_minima: integer range 0 to 9:
+signal nota_media: integer range 0 to 9:
+signal nota_medio_exceso: integer range 0 to 9:
+signal nota_final: integer range 0 to 9:
+signal seg: std_logic_vector (6 downto 0);
+
+begin
+--asignación de signals, entradas y salidas
+n1<=v_sw(7 downto 4);
+n2<=v_sw(3 downto 0);
+sel<=v_sw(9 downto 8);
+g_hex0<=seg;
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+suma_nota<=n1_entero+n2_entero;
+nota_media<=suma_nota/2;
+nota_media_exceso<=(suma_nota+1)/2;
+
+process(n1, n2)
+begin
+if n1>n2 then
+    nota_maxima<=n1_entero;
+    nota_minima<=n2_entero;
+else
+    nota_maxima<=n2_entero;
+    nota_minima<=n1_entero;
+end if;
+end process;
+
+process(sel, nota_maxima, nota_minima, nota_media, nota_media_exceso)
+begin
+case sel is 
+    when "00" => nota_final<=nota_media;
+    when "01" => nota_final<=nota_minima;
+    when "10" => nota_final<=nota_maxima;
+    when "11" => nota_final<=nota_media_exceso;
+when others => nota_final<=0;
+end case;
+end process;
+
+process(nota_final)
+begin
+case nota_final is
+     	when 0 => seg <= "1000000";
+     	when 1 => seg <= "1111001";
+     	when 2 => seg <= "0100100";
+     	when 3 => seg <= "0110000";
+     	when 4 => seg <= "0011001";
+     	when 5 => seg <= "0010010";
+     	when 6 => seg <= "0000011";
+     	when 7 => seg <= "1111000";
+     	when 8 => seg <= "0000000";
+     	when 9 => seg <= "0011000";
+     	when 10 => seg <= "0001001";
+     	when others => seg <= "0000110";
+end case;
+end process;
+
+end Behavioral;
