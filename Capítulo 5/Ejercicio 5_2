@@ -1,0 +1,96 @@
+# Ejercicio 5.2. Se desea controlar el motor anterior pero en este caso hay un sensor de reposo (S) capaz de detectar cuándo el limpiaparabrisas 
+# se encuentra en un extremo, sin penalizar la visión del conductor. Para parar el motor será necesario activar P, 
+# pero hecho esto, el motor no se parará inmediatamen-te, sino que esperará hasta alcanzar el reposo cuando S sea 1. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (6 downto 0);
+		G_HEX1 : out std_logic_vector (6 downto 0);
+		G_HEX2 : out std_logic_vector (6 downto 0);
+		G_HEX3 : out std_logic_vector (6 downto 0);
+		G_HEX4 : out std_logic_vector (6 downto 0);
+		G_HEX5 : out std_logic_vector (6 downto 0)
+		);
+end base;
+
+architecture behavioral of base is
+
+--aqui comienzan las signals
+signal clk: std_logic;
+signal inicio: std_logic;
+signal A: std_logic;
+signal P: std_logic;
+signal R: std_logic;
+signal entrada: std_logic_vector (2 downto 0);
+signal M: std_logic;
+type nombre_estado is (OFF, ONN, TMP);
+signal estado: nombre_estado  := OFF;
+
+begin
+-- asignación de signals, entradas y salidas
+clk<=G_CLOCK_50;
+inicio<=not(v_bt(0));
+A<=not(v_bt(3));
+P<=not(v_bt(2));
+R<=v_sw(0);
+g_led(0)<=M;
+--fin de asignación de signals, entradas y salidas
+
+entrada<=A&P&R;
+
+process(clk, inicio)
+begin
+if inicio='1' then
+	estado<=OFF;
+elsif rising_edge(clk) then
+case estado is
+			when OFF =>
+						case entrada is 
+						    when "001" | "011" => estado<=OFF;
+						    when "101" | "100" => estado<=ONN;
+						    when "000" | "010" => estado<=TMP;
+							when others => estado<=OFF;
+						end case;
+			when ONN => 
+						case entrada is
+						    when "101" | "100" | "000" | "001"=> estado<=ONN;
+						    when "010" => estado<=TMP;
+						    when "011" => estado<=OFF;
+							when others => estado<=OFF;
+						end case;
+			when TMP => 
+						case entrada is 
+						    when "010" | "000" => estado<=TMP;
+						    when "100" | "101" => estado<=ONN;
+						    when "001" | "011" => estado<=OFF;
+							when others => estado<=OFF;
+						end case;
+						
+			when others => estado<=OFF;
+end case;
+end if;
+end process;
+
+process(estado)
+begin
+case estado is
+    when ONN => M<='1';
+    when OFF => M<='0';
+    when TMP => M<='1';
+    when others => M<='0';
+end case;
+end process;
+
+end behavioral;
