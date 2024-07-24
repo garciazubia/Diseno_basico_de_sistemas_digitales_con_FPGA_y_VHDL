@@ -1,0 +1,83 @@
+# Problema 3.7
+# Un ascensor sube y baja sin parar gracias a un bit de dirección (DIR), tres sensores de posición (S1, S2 y S3) y un motor. 
+# El tamaño del ascensor y la distribución de senso-res hace que nunca más de dos sensores puedan ver cortado su haz de luz. 
+# Se desea indicar la velocidad (V de varios bits) del motor expresada en binaria puro con signo en C-2 según la siguiente lógica:
+# •	Si DIR = 0 entonces el ascensor está subiendo y lo hace a una velocidad que depende de cuántos sensores ha cruzado: 
+# Si no ha llegado a ninguno, entonces sube a una velocidad de 8 m/s, cuando corta un solo sensor lo hace a 6 m/s y cuando corta dos lo hace a 4 m/s.
+# •	Si DIR = 1 entonces el ascensor está bajando y lo hace a una velocidad que de-pende de cuántos sensores ha cruzado: 
+# Si no ha llegado a ninguno, entonces baja a una velocidad de –8 m/s, cuando corta un solo sensor lo hace a –6 m/s y cuando corta dos lo hace a –4 m/s.
+
+# Los sensores son de luz y, por tanto, entregan un 1 si ningún objeto interfiere en-tre el emisor y el receptor. Así cuando el ascensor pasa por un sensor, entonces este toma el valor 0.
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal dir: std_logic;
+signal sensores: std_logic_vector (2 downto 0);
+signal velocidad: integer range -8 to 8;
+signal velocidad_bits: std_logic_vector (4 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+dir<=v_sw(3);
+sensores<=v_sw(2 downto 0);
+g_led(4 downto 0)<=velocidad_bits;
+G_HEX0<="1111111";
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+velocidad_bits<=std_logic_vector(to_signed(velocidad, 5));
+
+process(dir, sensores)
+begin
+if dir='0' then 
+    if sensores="111" then
+        velocidad<=8;
+    elsif sensores="011" or sensores="101" or sensores="110" then
+        velocidad<=6;
+    elsif sensores="001" or sensores="100" then
+        velocidad<=4;
+    else
+        velocidad<=0;
+    end if;
+else    
+    if sensores="111" then
+        velocidad<=-8;
+    elsif sensores="011" or sensores="101" or sensores="110" then
+        velocidad<=-6;
+    elsif sensores="001" or sensores="100" then
+        velocidad<=-4;
+    else
+        velocidad<=0;
+    end if;
+end if;
+end process;
+
+end Behavioral;
