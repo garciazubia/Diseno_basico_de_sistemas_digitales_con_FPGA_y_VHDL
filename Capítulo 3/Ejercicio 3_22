@@ -1,0 +1,115 @@
+# Ejemplo 3.22. Hay dos bloques de tres países cada uno: B2, B1 y B0 y A2, A1 y A0 y el voto de un presidente P. Se debe ver en un 7-segmentos el resultado de la votación: 1 si gana el SÍ, 0 si gana el NO. El circuito debe considerar alguna condición especial:
+# •	Si hay empate, también se debe considerar el voto del presidente.
+# •	Si todos los países votan una cosa (0 ó 1), y el presidente lo contrario (1 ó 0), entonces ha de apagarse el 7-segmentos.
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal a2: std_logic;
+signal a1: std_logic;
+signal a0: std_logic;
+signal b2: std_logic;
+signal b1: std_logic;
+signal b0: std_logic;
+signal presidente: std_logic;
+signal veto: std_logic;
+signal resultado: std_logic;
+signal a2_aux: std_logic_vector (2 downto 0);
+signal a1_aux: std_logic_vector (2 downto 0);
+signal a0_aux: std_logic_vector (2 downto 0);
+signal b2_aux: std_logic_vector (2 downto 0);
+signal b1_aux: std_logic_vector (2 downto 0);
+signal b0_aux: std_logic_vector (2 downto 0);
+signal sumaa: std_logic_vector (2 downto 0);
+signal sumab: std_logic_vector (2 downto 0);
+signal seven_seg: std_logic_vector (6 downto 0);
+
+begin
+--asignación de signals, entradas y salidas
+a2<=v_sw(5);
+a1<=v_sw(4);
+a0<=v_sw(3);
+b2<=v_sw(2);
+b1<=v_sw(1);
+b0<=v_sw(0);
+presidente<=v_sw(9);
+veto<=v_sw(8);
+g_led(0)<=resultado;
+g_hex0<=seven_seg;
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+process(b2, b1, b0, a2, a1, a0)
+begin
+b2_aux<="00"&b2;
+b1_aux<="00"&b1;
+b0_aux<="00"&b0;
+a2_aux<="00"&a2;
+a1_aux<="00"&a1;
+a0_aux<="00"&a0;
+end process;
+
+sumaa<=a2_aux+a1_aux+a0_aux;
+sumab<=b2_aux+b1_aux+b0_aux;
+
+process(sumaa, sumab, presidente)
+begin
+if (sumaa+sumab)>3 then
+    resultado<='1';
+elsif (sumaa+sumab)<3 then
+    resultado<='0';
+elsif presidente='1' then
+    resultado<='1';
+else
+    resultado<='0';
+end if;
+end process;
+
+process(sumaa, sumab, presidente)
+begin
+if ((sumaa+sumab)=6 and presidente='0') or ((sumaa+sumab=0) and presi-dente='1') then
+    veto<='1';
+else
+    veto<='0';
+end if;
+end process;
+
+process(resultado, veto)
+begin
+if veto='1' then
+    seven_seg<="1111111";
+else
+    if resultado='1' then
+        seven_seg<="1001111";
+    else
+        seven_seg<="0000001";
+    end if;
+end if;
+end process;
+
+end Behavioral;
