@@ -1,0 +1,67 @@
+# Ejercicio 4.3.1. Implementar algo parecido al juego de luces del coche fantástico que se encendía del centro hacia afuera y de fuera hacia el medio: 
+# 0000110000–0001001000…. 1000000001 a un ritmo de 2 segundos por ciclo completo. Versión 2. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (6 downto 0);
+		G_HEX1 : out std_logic_vector (6 downto 0);
+		G_HEX2 : out std_logic_vector (6 downto 0);
+		G_HEX3 : out std_logic_vector (6 downto 0);
+		G_HEX4 : out std_logic_vector (6 downto 0);
+		G_HEX5 : out std_logic_vector (6 downto 0)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal clk: std_logic;
+signal clear: std_logic;
+signal contador_flancos: integer range 0 to 20000000;
+signal registro: std_logic_vector (9 downto 0) :="0000110000";
+--aquí acaban
+
+begin
+--asignación de signals, entradas y salidas
+clear <= not(v_bt(0));
+clk<=G_CLOCK_50;
+g_led <= registro;
+--fin de asignación de signals, entradas y salidas
+
+process(clear, clk)
+begin
+if clear = '1' then
+    contador_flancos <= 0;
+elsif rising_edge(clk) then
+    if contador_flancos = 20000000-1 then
+        contador_flancos <= 0;
+    else
+        contador_flancos <= contador_flancos + 1;
+    end if;
+end if;
+end process;
+
+process(clear, clk)
+begin
+if clear = '1' then
+    registro <= "0000110000";
+elsif rising_edge(clk) then
+    if contador_flancos = 20000000-1 then
+        registro(9 downto 5) <= registro(8 downto 5) & not(registro(9));
+        registro(4 downto 0) <= not(registro(0)) & registro(4 downto 1);
+    end if;
+end if;
+end process;
+
+end behavioral;
