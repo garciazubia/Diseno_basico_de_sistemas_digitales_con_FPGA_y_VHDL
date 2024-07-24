@@ -1,0 +1,134 @@
+# Ejemplo 3.23. En una votación hay seis países, cuatro países categoría A (A3-A0) y dos de categoría B (B1-B0). 
+# Se desea ver 1 o un 0 según haya ganado el SÍ o el NO, respectivamente. Si hubiera empate en la votación, entonces el voto de B1 vale doble.
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal a3: std_logic;
+signal a2: std_logic;
+signal a1: std_logic;
+signal a0: std_logic;
+signal b1: std_logic;
+signal b0: std_logic;
+signal a3_entero: integer range 0 to 1;
+signal a2_entero: integer range 0 to 1;
+signal a1_entero: integer range 0 to 1;
+signal a0_entero: integer range 0 to 1;
+signal b1_entero: integer range 0 to 1;
+signal b0_entero: integer range 0 to 1;
+signal suma_votos: integer range 0 to 6;
+signal suma_votos_doble: integer range 0 to 8;
+signal seg: std_logic_vector (6 downto 0);
+
+
+begin
+--asignación de signals, entradas y salidas
+a3<=v_sw(5);
+a2<=v_sw(4);
+a1<=v_sw(3);
+a0<=v_sw(2);
+b1<=v_sw(1);
+b0<=v_sw(0);
+g_hex0<= seg;
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+process(a3)
+begin
+if a3='0' then
+    a3_entero<=0;
+else
+    a3_entero<=1;
+end if;
+end process;
+
+process(a2)
+begin
+if a2='0' then
+    a2_entero<=0;
+else
+    a2_entero<=1;
+end if;
+end process;
+
+process(a1)
+begin
+if a1='0' then
+    a1_entero<=0;
+else
+    a1_entero<=1;
+end if;
+end process;
+
+process(a0)
+begin
+if a0='0' then
+    a0_entero<=0;
+else
+    a0_entero<=1;
+end if;
+end process;
+
+process(a1)
+begin
+if a1='0' then
+    a1_entero<=0;
+else
+    a1_entero<=1;
+end if;
+end process;
+
+process(a0)
+begin
+if a0='0' then
+    a0_entero<=0;
+else
+    a0_entero<=1;
+end if;
+end process;
+
+
+suma_votos<=A3_entero+A2_entero+A1_entero+A0_entero+B1_entero+B0_entero;
+su-ma_votos_doble<=A3_entero+A2_entero+A1_entero+A0_entero+B1_entero+B0_entero+B1_entero;
+
+process(suma_votos, suma_votos_doble)
+begin
+if suma_votos>3 then
+    seg<="1111001";
+elsif suma_votos<3 then
+    seg<="1000000";
+else
+    if suma_votos_doble>=4 then
+        seg<="1111001";
+    else 
+        seg<="1000000";
+    end if;
+end if;
+end process;
+
+end Behavioral;
