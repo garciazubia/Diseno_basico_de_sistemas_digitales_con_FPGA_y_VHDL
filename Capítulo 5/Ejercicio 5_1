@@ -1,1 +1,87 @@
-Hola Mundo
+# Ejercicio 5.1. El motor de un limpiaparabrisas tiene dos pulsadores: A (arranque) y P (paro). Al pulsar A, el motor arranca al pulsar P, 
+# el motor se para. Si no se pulsa nada, entonces se queda como estaba (en el mismo estado). 
+# Si, por error, se pulsaran simultáneamente (arranque y paro), entonces el limpia debe pararse por seguridad. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (6 downto 0);
+		G_HEX1 : out std_logic_vector (6 downto 0);
+		G_HEX2 : out std_logic_vector (6 downto 0);
+		G_HEX3 : out std_logic_vector (6 downto 0);
+		G_HEX4 : out std_logic_vector (6 downto 0);
+		G_HEX5 : out std_logic_vector (6 downto 0)
+		);
+end base;
+
+architecture behavioral of base is
+
+--aqui comienzan las signals
+signal clk: std_logic;
+signal inicio: std_logic;
+signal A: std_logic;
+signal P: std_logic;
+signal entrada: std_logic_vector (1 downto 0);
+signal M: std_logic;
+type nombre_estado is (OFF, ONN);
+signal estado: nombre_estado := OFF;
+
+begin
+--asignación de signals, entradas y salidas
+clk<=G_CLOCK_50;
+inicio<=not(v_bt(0));
+A<=not(v_bt(3));
+P<=not(v_bt(2));
+g_led(0)<=M;
+--fin de asignación de signals, entradas y salidas
+
+entrada<=A&P;
+
+process(clk, inicio)
+begin
+if inicio='1' then
+	estado<=OFF;
+elsif rising_edge(clk) then
+case estado is
+			when OFF =>
+						case entrada is 
+							when "00" =>	estado<=OFF;
+							when "01" =>	estado<=OFF;
+							when "10" =>	estado<=ONN;
+							when "11" => 	estado<=OFF;
+							when others => estado<=OFF;
+						end case;
+			when ONN => 
+						case entrada is 
+							when "00" =>	estado<=ONN;
+							when "01" =>	estado<=OFF;
+							when "10" =>	estado<=ONN;
+							when "11" => estado<=OFF;
+							when others => estado<=OFF;
+						end case;
+			when others => estado<=OFF;
+end case;
+end if;
+end process;
+
+process(estado)
+begin
+case estado is
+    when ONN => M<='1';
+    when OFF => M<='0';
+    when others => M<='0';
+end case;
+end process;
+
+end behavioral;
