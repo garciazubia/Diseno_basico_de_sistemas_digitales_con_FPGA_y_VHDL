@@ -1,0 +1,93 @@
+# Ejercicio 5.7. Genera un pulso de salida de duración T por cada pulso de entrada de duración t, teniendo en cuenta que el pulsador tiene rebotes, bounces. 
+# La salida será por pulso, al soltar.
+# Versión 1: Filtro de señal de entrada. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (6 downto 0);
+		G_HEX1 : out std_logic_vector (6 downto 0);
+		G_HEX2 : out std_logic_vector (6 downto 0);
+		G_HEX3 : out std_logic_vector (6 downto 0);
+		G_HEX4 : out std_logic_vector (6 downto 0);
+		G_HEX5 : out std_logic_vector (6 downto 0)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal clk: std_logic;
+signal inicio: std_logic;
+signal pulsador: std_logic;
+signal estado: std_logic_vector (1 downto 0);
+signal puls_sal: std_logic;
+signal cont_filtro: integer range 0 to 100000;
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+clk<=G_CLOCK_50;
+inicio<=not(v_bt(0));
+pulsador<=not(v_bt(3));
+g_led(0)<=puls_sal;
+--fin de asignación de signals, entradas y salidas
+
+--comienzan los process
+process(clk, inicio)
+begin
+if inicio='1' then	
+	estado<="00";
+	cont_filtro<=0;
+elsif rising_edge(clk) then
+	case estado is
+	when "00" => cont_filtro<=0;
+					if pulsador='0' then
+						estado<="00";
+					else
+						estado<="01";
+					end if;
+	when "01" =>	cont_filtro<=cont_filtro+1;
+					if pulsador='1' and cont_filtro<100000 then
+						estado<="01";
+					elsif pulsador='1' and cont_filtro=100000 then		
+						estado<="10";
+					else --pulsador='0'
+						estado<="00";
+					end if;
+	when "10" => 	cont_filtro<=0;
+					if pulsador='1' then
+						estado<="10";
+					else
+						estado<="11";
+					end if;
+	when "11" => 	cont_filtro<=0;
+					estado<="00";
+	when others => 	cont_filtro<=0;
+					estado<="00";
+	end case;
+end if;
+end process;
+
+process(estado)
+begin
+case estado is
+	when "00" => puls_sal<='0';
+	when "01" => puls_sal<='0';
+	when "10" => puls_sal<='0';
+	when "11" => puls_sal<='1';
+	when others => puls_sal<='0';
+end case;
+end process;
+
+end Behavioral;
