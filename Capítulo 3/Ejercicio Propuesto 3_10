@@ -1,0 +1,62 @@
+# Problema 3.10
+# Cuatro bits codifican en binario puro con signo en complemento a 2 la temperatura de una sala de curado de jamones; 
+# dicha temperatura siempre estará en el rango de + 4 a –4, no pudiendo salir de él. 
+#Diseña el mínimo circuito que visualiza en un display 7-segmentos si hay que activar el refrigerador, el calentador o nada. 
+# En el rango + 2 a –2 no es necesario activar ni el refrigerador ni el calentador; en el rango –3 a –4, es necesario activar el calentador;
+# y en el rango + 3 a + 4 hay que activar el refrigerador.
+
+#Para indicar que se ha activado el refrigerador se debe visualizar una A en el dis-play de 7-segmentos; 
+#al calentador le corresponde una C (mayúscula); y si no hay que activar nada, se debe excitar solo el segmento g.
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+--use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal temperatura: std_logic_vector (3 downto 0);
+signal seg: std_logic_vector (6 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+temperatura<=v_sw(3 downto 0);
+G_HEX0<=seg;
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+process(temperatura)
+begin
+if temperatura>=3 and temperatura<=4 then
+    seg<="0001000";
+elsif temperatura<=-3 and temperatura>=-4 then
+    seg<="0110001";
+else    
+    seg<="1111110";
+end if;
+end process;
+
+end Behavioral;
