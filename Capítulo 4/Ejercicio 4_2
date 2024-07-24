@@ -1,0 +1,51 @@
+# Ejemplo 4.2. Biestable síncrono por nivel D, latch. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal D: std_logic;
+signal clk: std_logic; 
+signal Q: std_logic :='0';
+signal noQ: std_logic :='1';
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+D<=v_sw(0);
+clk<=G_CLOCK_50;
+g_led(1)<=Q;
+g_led(0)<=noQ;
+--fin de asignación de signals, entradas y salidas
+
+--comienzan los process
+process(D, clk)
+begin
+if clk='1' then
+    Q<=D;
+    noQ<=not(D);
+end if;
+end process;
+
+end Behavioral;
