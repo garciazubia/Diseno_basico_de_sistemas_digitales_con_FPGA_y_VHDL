@@ -1,0 +1,87 @@
+# Problema 3.8
+# Una cafetera cuenta con cuatro entradas: INT, NA, NB y C. La señal INT enciende (1) y apaga (0) la cafetera. 
+# Las señales NA y NB indican el nivel de agua de la cafete-ra, 
+# NA es un sensor en la parte suprior del depósito de la cafetera y NB es un sensor en la parte baja del depósito de la cafetera, 
+# indicando si no hay agua (NA = 0 y NB = 0), hay poca agua (NA = 0 y NB = 1) y hay mucha agua (NA = 1 y NB = 1). 
+# La señal C indica si hay poco (0) o mucho café (1).
+
+# Los fabricantes quieren añadir un display 7-segmentos a la cafetera:
+# •	Si INT está a 0, el 7 segmentos dibuja un 0.
+# •	Si INT es 1 el 7-segmentos indica lo fuerte que está el café: suave, normal y fuerte:
+# •	Si no hay agua, se enciende una E mayúscula de error, independientemente del café.
+# •	Si hay mucha agua y poco café, el café es suave y solo se excita el segmento d (segmento inferior).
+# •	Si hay mucha agua y mucho café o hay poco agua y poco café, el café es normal y se excitan los segmentos d y g (los dos segmentos inferiores en vertical).
+# •	Si hay poca agua y mucho café, el café es fuerte y se excitan los segmentos a, d y g (los tres segmentos centrales).
+# •	Las posibles situaciones imposibles deben ser tratadas como condiciones libres.
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal int: std_logic;
+signal na: std_logic;
+signal nb: std_logic;
+signal c: std_logic;
+signal seg: std_logic_vector (6 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+int<=v_sw(3);
+na<=v_sw(2);
+nb<=v_sw(1);
+c<=v_sw(0);
+
+G_HEX0<=seg;
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+process(int, na, nb, c)
+begin
+if int='0' then
+    seg<="0000001";
+else
+    if na='1' and nb='1' then --mucha agua
+        if c='1' then
+            seg<="1110110";
+        else
+            seg<="1110111";
+        end if;    
+    elsif na='0' and nb='1' then --algo de agua
+        if c='1' then
+            seg<="0110110";
+        else
+            seg<="1110110";
+        end if;    
+    elsif na='0' and nb='0' then --no hay agua
+        seg<="0110000";
+    else
+        seg<="-------";
+    end if;
+end if;
+end process;
+
+end Behavioral;
