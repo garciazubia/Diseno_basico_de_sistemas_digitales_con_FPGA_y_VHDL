@@ -1,0 +1,64 @@
+# Problema 3_1
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal sensor_alto: std_logic;
+signal sensor_bajo: std_logic;
+signal tb1: std_logic;
+signal tb2: std_logic;
+signal entrada: std_logic_vector (3 downto 0);
+signal b1: std_logic;
+signal b2: std_logic;
+
+begin
+--asignación de signals, entradas y salidas
+sensor_alto<=v_sw(1);
+sensor_bajo<=v_sw(0);
+tb1<=v_sw(15);
+tb2<=v_sw(14);
+g_led(15)<=b1;
+g_led(0)<=b2;
+--fin de asignación de signals, entradas y salidas
+
+process(sensor_bajo, sensor_alto, tb1, tb2)
+begin
+if (sensor_bajo='0' and sensor_alto='0' and tb1='0' and tb2='0') then
+    b1<='1';
+    b2<='1';
+elsif ((sensor_bajo='1' and sensor_alto='0' and tb1='0') or
+        (sensor_bajo='0' and sensor_alto='0' and tb2='1')) then
+    b1<='1';
+    b2<='0';
+elsif ((sensor_bajo='1' and sensor_alto='0' and tb1='1' and tb2='0') or
+        (sensor_bajo='0' and sensor_alto='0' and tb1='1')) then
+    b1<='0';
+    b2<='1';
+else
+    b1<='0';
+    b2<='0';
+end if;
+    
+end process;
+
+end Behavioral;
