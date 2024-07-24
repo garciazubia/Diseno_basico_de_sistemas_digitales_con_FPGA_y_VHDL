@@ -1,0 +1,56 @@
+# Ejemplo 3.21. Dadas dos entradas a y b de cuatro bits en binario puro con signo en C2 se desea obtener la salida en cuatro bits 
+# con un bit adicional de overflow para detectar cuando se ha superado el rango de 4 bits.
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+--use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal a: std_logic_vector(3 downto 0);
+signal b: std_logic_vector(3 downto 0);
+signal a_5bits: std_logic_vector(4 downto 0);
+signal b_5bits: std_logic_vector(4 downto 0);
+signal suma: std_logic_vector (4 downto 0);
+signal overflow: std_logic;
+
+begin
+--asignación de signals, entradas y salidas
+a<=v_sw(3 downto 0);
+b<=v_sw(9 downto 6);
+g_led(4 downto 0)<=suma;
+g_led(9)<=overflow;
+--fin de asignación de signals, entradas y salidas
+
+a_5bits<=a(3)&a;
+b_5bits<=b(3)&b;
+suma<=a_5bits+b_5bits;
+
+process(suma)
+begin
+if suma<-8 or suma>7 then
+    overflow<='1';
+else
+    overflow<='0';
+end if;
+end process;
+
+end Behavioral;
