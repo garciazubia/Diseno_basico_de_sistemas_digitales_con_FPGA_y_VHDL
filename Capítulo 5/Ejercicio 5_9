@@ -1,0 +1,148 @@
+# Ejercicio 5.9. Contador con pulsador al soltar y filtrado a 10 milésimas de segundo, pero para que cuenta se deben dar dos pulsos consecutivos separados 
+# por no más de medio segundo. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (6 downto 0);
+		G_HEX1 : out std_logic_vector (6 downto 0);
+		G_HEX2 : out std_logic_vector (6 downto 0);
+		G_HEX3 : out std_logic_vector (6 downto 0);
+		G_HEX4 : out std_logic_vector (6 downto 0);
+		G_HEX5 : out std_logic_vector (6 downto 0)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal clk: std_logic;
+signal inicio: std_logic;
+signal pulsador: std_logic;
+signal estado: std_logic_vector (2 downto 0);
+signal puls_sal: std_logic;
+signal cont_filtro: integer range 0 to 50000;
+signal cont_estado: integer range 0 to 25000000;
+signal contador: std_logic_vector (3 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+clk<=G_CLOCK_50;
+inicio<=not(v_bt(0));
+pulsador<=not(v_bt(3));
+g_led(0)<=puls_sal;
+g_led(9 downto 6)<=contador;
+--fin de asignación de signals, entradas y salidas
+
+--comienzan los process
+process(inicio, clk)
+begin
+if inicio='1' then
+   	estado<="000";
+	cont_filtro<=0;
+	cont_espera<=0;
+elsif rising_edge(clk) then
+case estado is
+when "000" =>
+	cont_filtro<=0;
+	cont_espera<=0;
+	if pulsador='0' then
+		estado<="000";
+	else
+		estado<="001";
+	end if;
+when "001" => 
+   	cont_filtro<=cont_filtro+1;
+	cont_espera<=0;
+	if pulsador ='0' then
+		estado<="000";
+	elsif pulsador='1' and cont_filtro=500000 then
+		estado<="010";
+	else
+		estado<="001";
+	end if;
+when "010" =>
+	cont_filtro<=0;
+	cont_espera<=0;
+	if pulsador='0' then
+		estado<="011";
+	else
+		estado<="010";
+	end if;
+when "011"=>
+	cont_filtro<=0;
+	cont_espera<=cont_espera+1;
+	if pulsador='1' then
+		estado<="100";
+	elsif cont_espera=25000000 then
+		estado<="000";
+	else
+		estado<="011";
+	end if;
+when "100" =>
+	cont_filtro<=cont_filtro+1;
+	cont_espera<=0;
+	if pulsador='0' then	--rebote
+		estado<="011";
+	elsif pulsador='1' and cont_filtro=500000 then
+		estado<="101";
+	else
+		estado<="100";
+	end if;
+when "101" =>
+	cont_filtro<=0;
+	cont_espera<=0;
+	if pulsador='0' then
+		estado<="110";
+	else
+		estado<="101";
+	end if;
+when "110" =>
+	cont_filtro<=0;
+	cont_espera<=0;
+	estado<="000";
+when others =>
+	cont_filtro<=0;
+	cont_espera<=0;
+    	estado<="000";
+end case;
+end if;
+end process; 
+
+process(estado)
+begin
+case estado is
+when "000" => puls_sal<='0';
+when "001" => puls_sal<='0';
+when "010" => puls_sal<='0';
+when "011" => puls_sal<='0';
+when "100" => puls_sal<='0';
+when "101" => puls_sal<='0';
+when "110" => puls_sal<='1';
+when others => puls_sal<='0';
+end case;
+end process;
+
+process(clk, inicio)
+begin
+if inicio='1' then
+    contador<="0000";
+elsif rising_edge(clk) then
+    if puls_sal='1' then
+        contador<=contador+1;
+    end if;
+end if;
+end process;
+
+end Behavioral;
