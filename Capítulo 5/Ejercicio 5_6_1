@@ -1,0 +1,82 @@
+# Ejercicio 5.6. Diseñar el autómata capaz de generar un pulso de nivel 1 y duración 1 ciclo de reloj por cada pulso de una señal externa y duración t > T, 
+# mayor que un pulso de reloj. Es decir, convertir un pulso de duración t en un pulso de duración T. El pulso se genera al soltar el pulsador.
+# Versión 1: Detección de pulso. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (6 downto 0);
+		G_HEX1 : out std_logic_vector (6 downto 0);
+		G_HEX2 : out std_logic_vector (6 downto 0);
+		G_HEX3 : out std_logic_vector (6 downto 0);
+		G_HEX4 : out std_logic_vector (6 downto 0);
+		G_HEX5 : out std_logic_vector (6 downto 0)
+		);
+end base;
+
+architecture behavioral of base is
+
+--aqui comienzan las signals
+signal clk: std_logic;
+signal inicio: std_logic;
+signal P: std_logic;
+signal pulso: std_logic;
+type nombre_estado is (OFF, PULS, ONN);
+signal estado: nombre_estado  := OFF;
+
+begin
+--asignación de signals, entradas y salidas
+clk<=G_CLOCK_50;
+inicio<=not(v_bt(0));
+P<=not(v_bt(3));
+g_led(0)<=pulso;
+g_led(9 downto 6)<=contador;
+--fin de asignación de signals, entradas y salidas
+
+process(clk, inicio)
+begin
+if inicio='1' then
+	estado<=OFF;
+elsif rising_edge(clk) then
+case estado is
+    when OFF =>
+            if P='1' then
+                estado<=PULS;
+            else
+                estado<=OFF;
+            end if;    
+    when PULS =>
+            if P='1' then
+                estado<=PULS;
+            else
+                estado<=ONN;
+            end if;    
+    when ONN =>
+            estado<=OFF;
+    when others => estado<=OFF;
+end case;
+end if;
+end process;
+
+process(estado)
+begin
+case estado is
+when OFF => pulso<='0';
+when PULS => pulso<='0';
+when ONN => pulso<='1';
+when others => pulso<='0';
+end case;
+end process;
+
+end behavioral;
