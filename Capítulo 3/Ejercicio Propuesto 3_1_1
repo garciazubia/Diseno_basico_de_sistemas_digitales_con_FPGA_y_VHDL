@@ -1,0 +1,111 @@
+## Problema 3.1
+# Diseñar el circuito digital que controle dos bombas B1 y B2 en función de la cantidad de agua en un depósito. Los sensores B (nivel bajo de agua) y A (nivel alto de agua) entre-gan un 1 lógico cuando el agua supera dicho nivel. Los sensores TB1 y TB2 indican me-diante un 1 si la temperatura de las bombas B1 y B2 ha superado el límite de funciona-miento. Si el nivel del depósito se encuentra:
+# •	Por debajo de B se deben activar las dos bombas.
+# •	Por encima de B pero por debajo de A se debe activar una bomba, preferiblemente B1 (teniendo en cuenta su temperatura).
+# •	Por encima de A se deben desactivar B1 y B2.
+# •	Si la temperatura del motor superara el límite, este debe pararse.
+# •	Cualquier situación anómala en los valores de los sensores conllevará la parada de ambas bombas por seguridad.
+# Opción 1.
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal sensor_alto: std_logic;
+signal sensor_bajo: std_logic;
+signal tb1: std_logic;
+signal tb2: std_logic;
+signal entrada: std_logic_vector (3 downto 0);
+signal b1: std_logic;
+signal b2: std_logic;
+
+begin
+--asignación de signals, entradas y salidas
+sensor_alto<=v_sw(1);
+sensor_bajo<=v_sw(0);
+tb1<=v_sw(15);
+tb2<=v_sw(14);
+g_led(15)<=b1;
+g_led(0)<=b2;
+--fin de asignación de signals, entradas y salidas
+
+entrada<=sensor_alto&sensor_bajo&tb1&tb2;
+process(entrada)
+begin
+case entrada is 
+when "0000" => 
+                b1<='1';
+                b2<='1';
+when "0001" => 
+                b1<='1';
+                b2<='0';
+when "0010" => 
+                b1<='0';
+                b2<='1';
+when "0011" => 
+                b1<='0';
+                b2<='0';
+when "0100" => 
+                b1<='1';
+                b2<='0';
+when "0101" => 
+                b1<='1';
+                b2<='0';
+when "0110" => 
+                b1<='0';
+                b2<='1';
+when "0111" => 
+                b1<='0';
+                b2<='0';
+when "1000" => 
+                b1<='0';
+                b2<='0';
+when "1001" => 
+                b1<='0';
+                b2<='0';
+when "1010" => 
+                b1<='0';
+                b2<='0';
+when "1011" => 
+                b1<='0';
+                b2<='0';
+when "1100" => 
+                b1<='0';
+                b2<='0';
+when "1101" => 
+                b1<='0';
+                b2<='0';
+when "1110" => 
+                b1<='0';
+                b2<='0';
+when "1111" => 
+                b1<='0';
+                b2<='0';
+
+when others => 
+                b1<='-';
+                b2<='-';
+end case;
+end process;
+
+end Behavioral;
