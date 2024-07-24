@@ -1,0 +1,54 @@
+# Ejemplo 3.19. Dadas dos entradas a y b de cuatro bits en BCD, obtener su suma o su resta en función del valor de un interruptor: 
+# si vale 0, suma, y si vale 1, resta. La resta siempre será del mayor menos el menor.
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal a: std_logic_vector(3 downto 0);
+signal b: std_logic_vector(3 downto 0);
+signal oper: std_logic;
+signal resultado: std_logic_vector (3 downto 0);
+
+begin
+--asignación de signals, entradas y salidas
+a<=v_sw(3 downto 0);
+b<=v_sw(9 downto 6);
+oper<=v_sw(5);
+g_led(3 downto 0)<=resultado;
+--fin de asignación de signals, entradas y salidas
+
+process(a,b, oper)
+begin
+if oper='0' then
+    resultado<=a+b;
+else
+    if a > b then
+        resultado<=a-b;
+    else
+        resultado<=b-a;
+    end if;
+end if;    
+end process;
+
+end Behavioral;
