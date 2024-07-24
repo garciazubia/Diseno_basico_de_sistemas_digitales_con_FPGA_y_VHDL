@@ -1,0 +1,104 @@
+# Ejercicio 5.4. La entrada a un edificio cuenta con un detector de personas por rayos infrarrojos (P) y con una puerta automática que se abre 
+# y se cierra mediante un motor (M: con 00 está quieta, con 01 se abre y con 10 se cierra). 
+# Además, la puerta dispone de un sensor que indica si la puerta está “completamente” abierta (A) y de otro que indica si está “completamente” cerrada (C). 
+# Diseñar el autómata que abre y cierra las puertas si detecta per-sonas. Una vez comienza el ciclo de apertura de la puerta, este se completará tal y 
+# como nos encontramos en cualquier edificio. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (6 downto 0);
+		G_HEX1 : out std_logic_vector (6 downto 0);
+		G_HEX2 : out std_logic_vector (6 downto 0);
+		G_HEX3 : out std_logic_vector (6 downto 0);
+		G_HEX4 : out std_logic_vector (6 downto 0);
+		G_HEX5 : out std_logic_vector (6 downto 0)
+		);
+end base;
+
+architecture behavioral of base is
+
+--aqui comienzan las signals
+signal clk: std_logic;
+signal inicio: std_logic;
+signal P: std_logic;
+signal A: std_logic;
+signal C: std_logic;
+signal entrada: std_logic_vector (2 downto 0);
+signal M: std_logic_vector (1 downto 0);
+type nombre_estado is (ABNDO, ABTA, CNDO, CDA) :=CDA;
+signal estado: nombre_estado;
+
+begin
+-- asignación de signals, entradas y salidas
+clk<=G_CLOCK_50;
+inicio<=not(v_bt(0));
+P<=v_sw(3);
+A<=v_sw(2);
+C<=v_sw(1);
+g_led(1 downto 0)<=M;
+--fin de asignación de signals, entradas y salidas
+
+entrada<=P&A&C;
+
+process(clk, inicio)
+begin
+if inicio='1' then
+	estado<=CDA;
+elsif rising_edge(clk) then
+case estado is
+    when CDA =>
+            case entrada is
+            when "001" => estado<=CDA;
+            when "101" => estado<=ABNDO;
+            when others => estado<=CDA;
+            end case;
+    when ABNDO =>
+            case entrada is
+            when "101" | "001" | "000" | "100" => estado<=ABNDO;
+            when "011" => estado<=ABTA;
+            when "010" => estado<=CNDO;
+            when others => estado<=CDA;
+            end case;
+    when ABTA =>
+            case entrada is
+            when "011" => estado<=ABTA;
+            when "010" => estado<=CNDO;
+            when others => estado<=CDA;
+            end case;
+    when CNDO =>
+            case entrada is
+            when "000" | "010" => estado<=CNDO;
+            when "001" => estado<=CDA;
+            when "100" | "101" => estado<=ABNDO;
+            when "110" => estado<=ABTA;
+            when others => estado<=CDA;
+            end case;
+    when others => estado<=CDA;
+end case;
+end if;
+end process;
+
+process(estado)
+begin
+case estado is
+    when CDA => M<="00";
+    when ABNDO => M<="01";
+    when ABTA => M<="00";
+    when CNDO => M<="10";
+    when others => M<="00";
+end case;
+end process;
+
+end behavioral;
