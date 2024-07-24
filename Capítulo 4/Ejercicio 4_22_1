@@ -1,0 +1,195 @@
+# Ejemplo 4.22. Reloj de segundos y minutos MM:SS. Opción 1. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (6 downto 0);
+		G_HEX1 : out std_logic_vector (6 downto 0);
+		G_HEX2 : out std_logic_vector (6 downto 0);
+		G_HEX3 : out std_logic_vector (6 downto 0);
+		G_HEX4 : out std_logic_vector (6 downto 0);
+		G_HEX5 : out std_logic_vector (6 downto 0)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal inicio: std_logic;
+signal clk: std_logic;
+signal cont_1seg: integer range 0 to 50000000 :=0;
+signal cont_seg_unidades: integer range 0 to 9 :=0;
+signal cont_seg_decenas: integer range 0 to 5 :=0;
+signal cont_min_unidades: integer range 0 to 9 :=0;
+signal cont_min_decenas: integer range 0 to 5 :=0;
+signal siete_seg_dec_min: std_logic_vector (6 downto 0);
+signal siete_seg_uni_min: std_logic_vector (6 downto 0);
+signal siete_seg_dec_seg: std_logic_vector (6 downto 0);
+signal siete_seg_uni_seg: std_logic_vector (6 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+inicio<=not(v_bt(0));
+clk<=G_CLOCK_50; --se debe elegir un solo clk
+G_HEX0<=siete_seg_uni_seg;
+G_HEX1<= siete_seg_dec_seg;
+G_HEX2<= siete_seg_uni_min;
+G_HEX3<= siete_seg_dec_min;
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+--comienzan los process
+process(clk, inicio)
+begin
+if rising_edge(clk) then
+    if inicio='1' then  
+        cont_1seg<=0;
+    elsif cont_1seg=50000000-1 then  
+        cont_1seg<=0;
+    else
+        cont_1seg<=cont_1seg+1;
+    end if;
+end if;
+end process;
+
+process(inicio, clk)
+begin
+if rising_edge(clk) then
+    if inicio='1' then  
+        cont_seg_unidades<=0;
+    else
+        if cont_1seg=50000000-1 then
+            if cont_seg_unidades=9 then
+                cont_seg_unidades<=0;
+            else
+                cont_seg_unidades<=cont_seg_unidades+1;
+            end if;
+         end if;
+    end if;
+end if;	
+end process;
+
+process(inicio, clk)
+begin
+if rising_edge(clk) then
+    if inicio='1' then  
+        cont_seg_decenas<=0;
+    else
+        if cont_1seg=50000000-1 and cont_seg_unidades=9 then
+            if cont_seg_decenas=5 then
+                cont_seg_decenas<=0;
+            else
+                cont_seg_decenas<=cont_seg_decenas+1;
+            end if;
+        end if;
+    end if;
+end if;	
+end process;
+
+process(inicio, clk)
+begin
+if rising_edge(clk) then
+    if inicio='1' then  
+        cont_min_unidades<=0;
+    else
+        if cont_1seg=50000000-1 and cont_seg_unidades=9 and cont_seg_decenas=5 then
+            if cont_min_unidades=9 then
+                cont_min_unidades<=0;
+            else
+                cont_min_unidades<=cont_min_unidades+1;
+            end if;
+        end if;
+    end if;
+end if;	
+end process;
+
+process(inicio, clk)
+begin
+if rising_edge(clk) then
+    if inicio='1' then  
+        cont_min_decenas<=0;
+    else
+        if cont_1seg=50000000-1 and cont_seg_unidades=9 and cont_seg_decenas=5 and cont_min_unidades=9 then
+            if cont_min_decenas=5 then
+                cont_min_decenas<=0;
+            else
+                cont_min_decenas<=cont_min_decenas+1;
+            end if;
+        end if;
+    end if;
+end if;	
+end process;
+
+process(cont_seg_unidades)
+begin
+case cont_seg_unidades is
+        when 0 => siete_seg_uni_seg<="1000000";
+        when 1 => siete_seg_uni_seg <="1111001";
+        when 2 => siete_seg_uni_seg <="0100100";
+        when 3 => siete_seg_uni_seg <="0110000";
+        when 4 => siete_seg_uni_seg <="0011001";
+        when 5 => siete_seg_uni_seg <="0010010";
+        when 6 => siete_seg_uni_seg <="0000011";
+        when 7 => siete_seg_uni_seg <="1111000";
+        when 8 => siete_seg_uni_seg <="0000000";
+        when 9 => siete_seg_uni_seg <="0011000";
+        when others => siete_seg_uni_seg <="0000110";
+end case;
+end process;
+
+process(cont_seg_decenas)
+begin
+case cont_seg_decenas is
+        when 0 => siete_seg_dec_seg<="1000000";
+        when 1 => siete_seg_dec_seg <="1111001";
+        when 2 => siete_seg_dec_seg <="0100100";
+        when 3 => siete_seg_dec_seg <="0110000";
+        when 4 => siete_seg_dec_seg <="0011001";
+        when 5 => siete_seg_dec_seg <="0010010";
+        when others => siete_seg_dec_seg <="0000110";
+end case;
+end process;
+
+process(cont_min_unidades)
+begin
+case cont_min_unidades is
+        when 0 => siete_seg_uni_min <="1000000";
+        when 1 => siete_seg_uni_min <="1111001";
+        when 2 => siete_seg_uni_min <="0100100";
+        when 3 => siete_seg_uni_min <="0110000";
+        when 4 => siete_seg_uni_min <="0011001";
+        when 5 => siete_seg_uni_min <="0010010";
+        when 6 => siete_seg_uni_min <="0000011";
+        when 7 => siete_seg_uni_min <="1111000";
+        when 8 => siete_seg_uni_min <="0000000";
+        when 9 => siete_seg_uni_min <="0011000";
+        when others => siete_seg_uni_min <="0000110";
+end case;
+end process;
+
+process(cont_min_decenas)
+begin
+case cont_min_decenas is
+        when 0 => siete_seg_dec_min<="1000000";
+        when 1 => siete_seg_dec_min <="1111001";
+        when 2 => siete_seg_dec_min <="0100100";
+        when 3 => siete_seg_dec_min <="0110000";
+        when 4 => siete_seg_dec_min <="0011001";
+        when 5 => siete_seg_dec_min <="0010010";
+        when others => siete_seg_dec_min <="0000110";
+end case;
+end process;
+
+end Behavioral;
