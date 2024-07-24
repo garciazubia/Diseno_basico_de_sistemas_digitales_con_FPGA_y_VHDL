@@ -1,1 +1,62 @@
-Hola Mundo
+# Ejemplo 4.1. Biestable RS asíncrono activo por nivel bajo.
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal S: std_logic;
+signal R: std_logic;
+signal Q: std_logic;
+signal noQ: std_logic;
+signal entrada: std_logic_vector (1 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+S<=v_sw(1);
+R<=v_sw(0);
+g_led(1)<=Q;
+g_led(0)<=noQ;
+--fin de asignación de signals, entradas y salidas
+
+--comienzan los process
+entrada<=S&R;
+process(entrada)
+begin
+case entrada is
+when "11" => 	Q<=Q; --memoria
+		noQ<=noQ;
+when "01" =>	Q<='1'; --puesta a 1
+		noQ<='0';
+when "10" =>	Q<='0'; --puesta a 0
+		noQ<='1';
+when "00" =>	Q<=Q; --situación prohibida
+		noQ<=noQ;
+when others =>	Q<=Q;
+		noQ<=noQ;
+end case;
+end process;
+
+end Behavioral;
+
