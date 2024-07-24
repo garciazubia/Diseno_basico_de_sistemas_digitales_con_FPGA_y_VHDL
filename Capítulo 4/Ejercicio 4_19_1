@@ -1,0 +1,64 @@
+# Ejemplo 4.19. Parpadeo de led cada 0,5 segundos. Opción 1. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (6 downto 0);
+		G_HEX1 : out std_logic_vector (6 downto 0);
+		G_HEX2 : out std_logic_vector (6 downto 0);
+		G_HEX3 : out std_logic_vector (6 downto 0);
+		G_HEX4 : out std_logic_vector (6 downto 0);
+		G_HEX5 : out std_logic_vector (6 downto 0)
+		);
+end base;
+
+architecture behavioral of base is
+
+--aqui comienzan las signals
+signal clear: std_logic;
+signal clk: std_logic;
+signal contador: integer range 0 to 50000000 :=0;
+signal led: std_logic;
+-- aquí acaban
+
+begin
+--asignación de signals, entradas y salidas
+clear<=not(v_bt(0));
+clk<=G_CLOCK_50; --se debe elegir un solo clk
+g_led(0)<=led;
+--fin de asignación de signals, entradas y salidas
+
+process(clear, clk)
+begin
+if clear='1' then
+    contador<=0;
+elsif rising_edge (clk) then
+    if contador=50000000-1 then
+        contador<=0;
+    else
+        contador<=contador+1;
+    end if;    
+end if;
+end process;
+
+process(contador)
+begin
+if contador<25000000-1 then
+    led<='0';
+else
+    led<='1';
+end if;
+end process;
+
+end behavioral;
