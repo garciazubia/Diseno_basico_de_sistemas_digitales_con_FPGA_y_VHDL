@@ -1,3 +1,5 @@
+# Ejemplo 3.4. Dada una entrada de 4 bits, obtener en la salida su complemento a 2. Opción 2. TESTED
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
