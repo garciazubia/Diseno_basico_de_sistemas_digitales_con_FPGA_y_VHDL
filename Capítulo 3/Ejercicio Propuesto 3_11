@@ -1,0 +1,54 @@
+# Problema 3.11
+# Implementar el circuito digital que activa un led en la salida si de los cuatros bits de entrada (interruptores) dos o más no están a 1 consecutivamente. 
+# Si 2 o más entradas consecutivas estuvieran a 1, entonces el led debe estar apagado.
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal entrada: std_logic_vector (3 downto 0);
+signal salida: std_logic;
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+entrada<=v_sw(3 downto 0);
+g_led(0)<=salida;
+G_HEX0<="1111111";
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+process(entrada)
+begin
+case entrada is
+when "0011" | "0110" | "1100" | "1011" | "1101" | "1110" | "0111" |  "1111" => salida<='0';
+when others => salida<='1';
+end case;
+end process;
+
+end Behavioral;
