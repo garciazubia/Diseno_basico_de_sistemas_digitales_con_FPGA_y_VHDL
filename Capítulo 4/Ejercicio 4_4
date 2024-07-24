@@ -1,0 +1,107 @@
+# Ejercicio 4.4. Implementar un contador descendente de 9 a 0 que solo generará la secuencia al activarse una señal, 
+# completada la secuencia el contador se detiene hasta una próxima activación de la señal. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (6 downto 0);
+		G_HEX1 : out std_logic_vector (6 downto 0);
+		G_HEX2 : out std_logic_vector (6 downto 0);
+		G_HEX3 : out std_logic_vector (6 downto 0);
+		G_HEX4 : out std_logic_vector (6 downto 0);
+		G_HEX5 : out std_logic_vector (6 downto 0)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal ck: std_logic;
+signal clear: std_logic;
+signal pulso: std_logic;
+signal arranque: std_logic;
+signal cont_1seg: integer range 0 to 50000000 :=0;
+signal cont_seg: integer range 0 to 9;
+signal siete_seg: std_logic_vector (6 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+clk<=G_CLOCK_50;
+clear<=not(v_bt(0));
+pulso<=not(v_bt(3));
+g_led(0)<=arranque;
+g_hex0<=siete_seg;
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+--comienzan los process
+process(clk, inicio)
+begin
+if rising_edge(clk) then
+    if inicio='1' then  
+        cont_1seg<=0;
+    elsif cont_1seg=50000000-1 then  
+        cont_1seg<=0;
+    else
+        cont_1seg<=cont_1seg+1;
+    end if;
+end if;
+end process;
+
+process(inicio, clk)
+begin
+if rising_edge(clk) then
+    if inicio='1' then  
+        cont_seg<=9;
+        arranque<='0';
+    else
+        if pulso='0' and arranque='0' then
+            cont_seg <=9;
+        else 
+            arranque<='1';
+            if cont_1seg=50000000-1 then
+                if cont_seg =0 then
+                    cont_seg <=9;
+                    arranque<='0';
+                else
+                    cont_seg <= cont_seg-1;
+                end if;
+            end if;
+        end if;    
+    end if;
+end if;	
+end process;
+
+process(cont_seg)
+begin
+case cont_seg is
+        when 0 => siete_seg<="1000000";
+        when 1 => siete_seg<="1111001";
+        when 2 => siete_seg<="0100100";
+        when 3 => siete_seg<="0110000";
+        when 4 => siete_seg<="0011001";
+        when 5 => siete_seg<="0010010";
+        when 6 => siete_seg<="0000011";
+        when 7 => siete_seg<="1111000";
+        when 8 => siete_seg<="0000000";
+        when 9 => siete_seg <="0011000";
+        when others => siete_seg <="0000110";
+end case;
+end process;
+
+end Behavioral;
