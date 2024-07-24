@@ -14,6 +14,8 @@
 # •	Si hay poca agua y mucho café, el café es fuerte y se excitan los segmentos a, d y g (los tres segmentos centrales).
 # •	Las posibles situaciones imposibles deben ser tratadas como condiciones libres.
 
+# TESTED
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
