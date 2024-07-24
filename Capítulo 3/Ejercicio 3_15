@@ -1,5 +1,5 @@
 # Ejemplo 3.15. Dadas tres entradas a, b y c de 3 bits cada una se desea visualizar en un 7-segmentos la mayor de ellas. 
-#
+# TESTED
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
