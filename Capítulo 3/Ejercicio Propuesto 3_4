@@ -1,0 +1,81 @@
+# Problema 3.4
+# La empresa AZ&AG ha creado un nuevo método para poder clasificar sus dos productos más vendidos.Dicho método consiste en utilizar cuatro dígitos binarios, 
+# de los cuales el primero diferencia los pantalones de las sudaderas y los restantes tres sirven para establecer el color del producto. 
+# El resultado se muestra en un display de 7 segmentos.
+# En cuanto a la primera entrada, si es 0 significa que el producto es una sudadera y no tendrá ningún efecto en el display. 
+# Con respecto a los tres últimos dígitos, el primero de ellos indicará que el produc-to contiene una mezcla con rojo (Red), 
+# el segundo corresponde al verde (Green) y el último estará sujeto al azul (Blue). Es decir, estamos ante un código de colores RGB y 
+# se debe mostrar en el display lo que sucede al mezclar cada uno de los tres colores primarios (se mostrará la letra inicial de la mezcla). 
+# Los colores principales que se obtienen con el RGB son los siguientes:
+# Por motivos empresariales, no se fabrican nunca productos blancos ni negros.
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal tipo: std_logic;
+signal R: std_logic;
+signal G: std_logic;
+signal B: std_logic;
+signal seg: std_logic_vector (6 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+tipo<=v_sw(3);
+R<=v_sw(2);
+G<=v_sw(1);
+B<=v_sw(0);
+G_HEX0<=seg;
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+process(tipo, R, G, B)
+begin
+if tipo='0' then --sudadera
+    seg<="1111111";
+else
+    if R='1' and G='0' and B='0' then
+        seg<="1111010"; --red
+    elsif R='1' and G='1' and B='0' then
+        seg<="1000100"; --yellow
+    elsif R='1' and G='0' and B='1' then
+        seg<="0011000"; --purple
+    elsif R='0' and G='1' and B='0' then
+        seg<="0000100"; --green
+    elsif R='0' and G='1' and B='1' then
+        seg<="1110010"; --cyan    
+    elsif R='0' and G='0' and B='1' then
+        seg<="1100000"; --blue
+    else
+        seg<="-------"; --black & white
+    end if;
+end if;
+end process;
+
+end Behavioral;
