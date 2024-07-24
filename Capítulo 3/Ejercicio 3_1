@@ -1,1 +1,60 @@
-hola mundo
+#Ejemplo 3.1. Decodificador de BCD a display 7-segmentos.
+#La entrada son los cuatro bits del código BCD y las salidas son los 7 bits, desde a hasta g, del display 7-segmentos.
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal bcd: std_logic_vector (3 downto 0);
+signal seg: std_logic_vector (6 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+bcd<=v_sw(3 downto 0);
+g_hex0<= seg;
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+process(bcd)
+begin
+case bcd is
+     when "0000" => seg <= "0000001";
+     when "0001" => seg <= "1001111";
+     when "0010" => seg <= "0010010";
+     when "0011" => seg <= "0000110";
+     when "0100" => seg <= "1001100";
+     when "0101" => seg <= "0100100";
+     when "0110" => seg <= "1100000";
+     when "0111" => seg <= "0001111";
+     when "1000" => seg <= "0000000";
+     when "1001" => seg <= "0001100";
+     when others => seg <= "-------";
+end case;
+end process;
+
+end Behavioral;
+
