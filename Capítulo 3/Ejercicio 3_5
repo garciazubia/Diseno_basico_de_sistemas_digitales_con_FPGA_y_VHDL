@@ -1,0 +1,85 @@
+# Ejemplo 3.5. Un circuito tiene tres sensores lumínicos puestos a diferentes alturas, alto, mediano y bajo, SA, SM y SB. Si un diamante es grande interfiere las tres señales lumínicas, si es mediano, dos (SM y SB), si es pequeño, una (SB) y si es enano, ninguna. El sensor de peso en quilates (SP) que se pone a 1 si supera los tres quilates, y a 0 en caso contrario. Las condiciones son:
+# •	Un diamante grande (G) o mediano (M) debe pesar al menos 3 quilates, si no, se rechaza (R).
+# •	Si es pequeño, nunca debe pesar más de 3 quilates, en caso contrario es rechazado (R).
+# •	Los diamantes enanos se rechazan (R).
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal SA: std_logic;
+signal SM: std_logic;
+signal SB: std_logic;
+signal SP: std_logic;
+signal grande: std_logic;
+signal mediano: std_logic;
+signal pequeno: std_logic;
+signal rechazado: std_logic;
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+SA<=v_sw(3);
+SM<=v_sw(2);
+SB<=v_sw(1);
+SP<=v_sw(0);
+g_led(3)<=grande;
+g_led(2)<=mediano;
+g_led(1)<=pequeno;
+g_led(0)<=rechazado;
+--fin de asignación de signals, entradas y salidas
+
+process(SA, SM, SB, SP)
+begin
+if (SA='1' and SM='1' and SB='1' and SP='1') then  
+    grande<='1';
+    mediano<='0';
+    pequeno<='0';
+    rechazado<='0';
+elsif (SA='0' and SM='1' and SB='1' and SP='1') then  
+    grande<='0';
+    mediano<='1';
+    pequeno<='0';
+    rechazado<='0';
+elsif (SA='0' and SM='0' and SB='1' and SP='0') then  
+    grande<='0';
+    mediano<='0';
+    pequeno<='1';
+    rechazado<='0';
+elsif ((SA='1' and SM='1' and SB='1' and SP='0') or
+        (SA='0' and SM='1' and SB='1' and SP='0') or
+        (SA='0' and SM='0' and SB='1' and SP='1') or
+        (SA='0' and SM='0' and SB='0')) then
+    grande<='0';
+    mediano<='0';
+    pequeno<='0';
+    rechazado<='1';
+else
+    grande<='-';
+    mediano<='-';
+    pequeno<='-';
+    rechazado<='-';
+end if;    
+end process;
+
+end Behavioral;
