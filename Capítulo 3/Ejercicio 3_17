@@ -1,0 +1,77 @@
+# Ejemplo 3.17. El anterior, pero si la suma es menor o igual a 4, se le suma 5 y si es mayor o igual a 5, se le resta 5.
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal a: std_logic_vector (3 downto 0);
+signal b: std_logic_vector (3 downto 0);
+signal suma: std_logic_vector (3 downto 0);
+signal resultado: std_logic_vector (3 downto 0);
+signal seg: std_logic_vector (6 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+a<=v_sw(3 downto 0);
+b<=v_sw(9 downto 6);
+g_hex0<=seg;
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+process(a,b)
+begin
+suma<=a+b;
+end process;
+
+process(suma)
+begin
+if suma<=4 then
+    resultado<=suma+5;
+else
+    resultado<=suma-5;
+end if;
+end process;
+
+process(resultado)
+begin
+case resultado is
+     	when "0000" => seg <= "1000000";
+     	when "0001" => seg <= "1111001";
+     	when "0010" => seg <= "0100100";
+     	when "0011" => seg <= "0110000";
+     	when "0100" => seg <= "0011001";
+     	when "0101" => seg <= "0010010";
+     	when "0110" => seg <= "0000011";
+     	when "0111" => seg <= "1111000";
+     	when "1000" => seg <= "0000000";
+     	when "1001" => seg <= "0011000";
+     	when others => seg <= "0000110";
+end case;
+end process;
+
+end Behavioral;
