@@ -1,0 +1,305 @@
+# Ejercicio 5.17. Implementa una pila LIFO de 8 posiciones de 8 bits cada una. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal clk: std_logic;
+signal inicio: std_logic;
+signal entrada: std_logic_vector (7 downto 0);
+signal push: std_logic;
+signal pop: std_logic;
+type data is array (7 downto 0) of std_logic_vector(7 downto 0);
+signal pila: data;
+signal salida: std_logic_vector (7 downto 0);
+signal stack_pointer: integer range 0 to 7;
+type nombre_estado is (idle, mete_push, saca_pop, llena, vacia, overflow, underflow);
+signal estado_pila: nombre_estado :=idle;
+signal seg_data0: std_logic_vector (6 downto 0);
+signal seg_data1: std_logic_vector (6 downto 0);
+signal pila_llena: std_logic;
+signal pila_vacia: std_logic;
+signal error_overflow: std_logic;
+signal error_underflow: std_logic;
+signal seg: std_logic_vector (6 downto 0);
+--signals para el flitrado de push y pop.
+type nombre_estado_push_pop is (OFF, PULS, ONN);
+signal estado_push: nombre_estado_push_pop  := OFF;
+signal estado_pop: nombre_estado_push_pop  := OFF;
+signal salida_push: std_logic;
+signal salida_pop: std_logic;
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+clk<=G_CLOCK_50;
+inicio<=not(v_bt(0));
+push<=not(v_bt(3));
+pop<=not(v_bt(2));
+entrada<=v_sw(7 downto 0);
+g_led(3)<=pila_llena;
+g_led(2)<=pila_vacia;
+g_led(7)<=error_overflow;
+g_led(0)<=error_underflow;
+g_hex0<=seg_data0;
+G_HEX1<=seg_data1;
+G_HEX2<="1111110";
+G_HEX3<=seg;
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+process(clk, inicio)
+begin
+if inicio='1' then
+	estado_push<=OFF;
+elsif rising_edge(clk) then
+case estado_push is
+    when OFF =>
+            if push='1' then
+                estado_push<=PULS;
+            else
+                estado_push<=OFF;
+            end if;    
+    when PULS =>
+            if push='1' then
+                estado_push<=PULS;
+            else
+                estado_push<=ONN;
+            end if;    
+    when ONN =>
+            estado_push<=OFF;
+    when others => estado_push<=OFF;
+end case;
+end if;
+end process;
+
+process(estado_push)
+begin
+case estado_push is
+when OFF => salida_push<='0';
+when PULS => salida_push<='0';
+when ONN => salida_push<='1';
+when others => salida_push<='0';
+end case;
+end process;
+
+process(clk, inicio)
+begin
+if inicio='1' then
+	estado_pop<=OFF;
+elsif rising_edge(clk) then
+case estado_pop is
+    when OFF =>
+            if pop='1' then
+                estado_pop<=PULS;
+            else
+                estado_pop<=OFF;
+            end if;    
+    when PULS =>
+            if pop='1' then
+                estado_pop<=PULS;
+            else
+                estado_pop<=ONN;
+            end if;    
+    when ONN =>
+            estado_pop<=OFF;
+    when others => estado_pop<=OFF;
+end case;
+end if;
+end process;
+
+process(estado_pop)
+begin
+case estado_pop is
+when OFF => salida_pop<='0';
+when PULS => salida_pop<='0';
+when ONN => salida_pop<='1';
+when others => salida_pop<='0';
+end case;
+end process;
+
+process(clk, inicio)
+begin
+if inicio='1' then
+    estado_pila<=vacia;
+    salida<="00000000";
+    stack_pointer<=7;
+    pila<=("00000000","00000000","00000000","00000000","00000000","00000000","00000000","00000000");
+elsif rising_edge(clk) then
+    case estado_pila is
+    when idle =>    if salida_push='1' then
+                            estado_pila<=mete_push;
+                            pila(stack_pointer)<=entrada;
+					        stack_pointer<=stack_pointer-1; 
+                    elsif salida_pop='1' then
+                            estado_pila<=saca_pop;
+                            stack_pointer<=stack_pointer+1;
+                    end if;                    
+
+    when mete_push =>   if stack_pointer>0 then
+                            estado_pila<=idle;
+                        else
+                            estado_pila<=llena;
+                        end if;                            
+
+    when saca_pop =>    salida<=pila(stack_pointer);
+                        if stack_pointer/=7 then
+                            estado_pila<=idle;
+                        else
+                            estado_pila<=vacia;
+                        end if;
+
+    when llena =>       if salida_pop='1' then
+                            estado_pila<=saca_pop;
+                            stack_pointer<=stack_pointer+1;
+                        elsif salida_push='1' then
+                            estado_pila<=overflow;
+                        end if;
+                        
+    when vacia =>       if salida_push='1' then                        
+                            estado_pila<=mete_push;
+                            pila(stack_pointer)<=entrada;
+					        stack_pointer<=stack_pointer-1;
+                        elsif salida_pop='1' then
+                            estado_pila<=underflow;
+                        end if;                            
+
+    when overflow =>    if salida_pop='1' then
+                            estado_pila<=saca_pop;
+                            stack_pointer<=stack_pointer+1;
+                        end if;
+
+    when underflow =>   if salida_push='1' then                        
+                            estado_pila<=mete_push;
+                            pila(stack_pointer)<=entrada;
+                        end if;                            
+
+    when others =>          salida<="00000000";
+                            estado_pila<=idle;
+                            stack_pointer<=7;
+    end case;
+end if;
+end process;
+
+process(estado_pila)
+begin
+case estado_pila is
+when idle =>        pila_llena<='0';
+                    pila_vacia<='0';
+                    error_overflow<='0';
+                    error_underflow<='0';
+when mete_push =>   pila_llena<='0';
+                    pila_vacia<='0';
+                    error_overflow<='0';
+                    error_underflow<='0';
+when saca_pop =>    pila_llena<='0';
+                    pila_vacia<='0';
+                    error_overflow<='0';
+                    error_underflow<='0';
+when llena =>       pila_llena<='1';
+                    pila_vacia<='0';
+                    error_overflow<='0';
+                    error_underflow<='0';
+when vacia =>       pila_llena<='0';
+                    pila_vacia<='1';
+                    error_overflow<='0';
+                    error_underflow<='0';
+when overflow =>    pila_llena<='0';
+                    pila_vacia<='0';
+                    error_overflow<='1';
+                    error_underflow<='0';
+when underflow =>   pila_llena<='0';
+                    pila_vacia<='0';
+                    error_overflow<='0';
+                    error_underflow<='1';
+when others =>      pila_llena<='0';
+                    pila_vacia<='0';
+                    error_overflow<='0';
+                    error_underflow<='0';
+end case;
+end process;
+
+process(salida(3 downto 0))
+begin
+case salida(3 downto 0) is
+when "0000" => seg_data0<="0000001";
+when "0001" => seg_data0<="1001111";
+when "0010" => seg_data0<="0010010";
+when "0011" => seg_data0<="0000110";
+when "0100" => seg_data0<="1001100";
+when "0101" => seg_data0<="0100100";
+when "0110" => seg_data0<="0100000";
+when "0111" => seg_data0<="0001111";
+when "1000" => seg_data0<="0000000";
+when "1001" => seg_data0<="0001100";
+when "1010" => seg_data0<="0001000";
+when "1011" => seg_data0<="1100000";
+when "1100" => seg_data0<="0110001";
+when "1101" => seg_data0<="0000110";
+when "1110" => seg_data0<="0110000";
+when "1111" => seg_data0<="0111000";
+when others => seg_data0<="-------";
+end case;
+end process;
+
+process(salida(7 downto 4))
+begin
+case salida(7 downto 4) is
+when "0000" => seg_data1<="0000001";
+when "0001" => seg_data1<="1001111";
+when "0010" => seg_data1<="0010010";
+when "0011" => seg_data1<="0000110";
+when "0100" => seg_data1<="1001100";
+when "0101" => seg_data1<="0100100";
+when "0110" => seg_data1<="0100000";
+when "0111" => seg_data1<="0001111";
+when "1000" => seg_data1<="0000000";
+when "1001" => seg_data1<="0001100";
+when "1010" => seg_data1<="0001000";
+when "1011" => seg_data1<="1100000";
+when "1100" => seg_data1<="0110001";
+when "1101" => seg_data1<="0000110";
+when "1110" => seg_data1<="0110000";
+when "1111" => seg_data1<="0111000";
+when others => seg_data1<="-------";
+end case;
+end process;
+
+process(stack_pointer)
+begin
+case stack_pointer is
+when 0 => seg<="0000001";
+when 1 => seg<="1001111";
+when 2 => seg<="0010010";
+when 3 => seg<="0000110";
+when 4 => seg<="1001100";
+when 5 => seg<="0100100";
+when 6 => seg<="0100000";
+when 7 => seg<="0001111";
+when others => seg<="0110000";
+end case;
+end process;
+
+end Behavioral;
