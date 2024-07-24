@@ -1,0 +1,109 @@
+# Ejercicio 5.5. Diseña el autómata capaz de controlar una alarma (AL) que dispone de un pulsador (P) y un detector de personas (D). 
+# En principio la alarma está en reposo y no se activa aunque entre gente, ahora bien, si se aprieta y suelta el pulsador, 
+# entonces la alarma pasa a estar armada y después de esta acción si una persona fuera detectada, entonces sí sonaría la alarma y no dejaría de sonar 
+# aunque la persona desapareciera. Para parar la alarma sería necesario volver a apretar y soltar el pulsador, 
+# quedando apagada en este caso. Si de nuevo se quisiera armar la alarma sería necesario volver a apretar y soltar el pulsador. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (6 downto 0);
+		G_HEX1 : out std_logic_vector (6 downto 0);
+		G_HEX2 : out std_logic_vector (6 downto 0);
+		G_HEX3 : out std_logic_vector (6 downto 0);
+		G_HEX4 : out std_logic_vector (6 downto 0);
+		G_HEX5 : out std_logic_vector (6 downto 0)
+		);
+end base;
+
+architecture behavioral of base is
+
+--aqui comienzan las signals
+signal clk: std_logic;
+signal inicio: std_logic;
+signal P: std_logic;
+signal D: std_logic;
+signal entrada: std_logic_vector (1 downto 0);
+signal alarma: std_logic;
+type nombre_estado is (OFF, TEMP, ARM, ONN, DES);
+signal estado: nombre_estado  := OFF;
+
+begin
+-- asignación de signals, entradas y salidas
+clk<=G_CLOCK_50;
+inicio<=not(v_bt(0));
+P<=not(v_bt(3));
+D<=not(v_bt(2));
+g_led(0)<=alarma;
+--fin de asignación de signals, entradas y salidas
+
+entrada<=P&D;
+
+process(clk, inicio)
+begin
+if inicio='1' then
+	estado<=OFF;
+elsif rising_edge(clk) then
+case estado is
+    when OFF =>
+            case entrada is
+            when "00" | "01" => estado<=OFF;
+            when "10" => estado<=TEMP;
+            when others => estado<=OFF;
+            end case;
+    when TEMP =>
+            case entrada is
+            when "10" => estado<=TEMP;
+            when "00" => estado<=ARM;
+            when "01" => estado<=ONN;
+            when others => estado<=OFF;
+            end case;
+    when ARM =>
+            case entrada is
+            when "00" => estado<=ARM;
+            when "01" => estado<=ONN;
+            when "10" => estado<=DES;
+            when others => estado<=OFF;
+            end case;
+    when ONN =>
+            case entrada is
+            when "00" | "01" => estado<=ONN;
+            when "10" => estado<=DES;
+            when others => estado<=OFF;
+            end case;
+    when DES =>
+            case entrada is
+            when "10" => estado<=DES;
+            when "00" => estado<=OFF;
+            when "01" => estado<=ONN;
+            when others => estado<=OFF;
+            end case;
+    when others => estado<=OFF;
+end case;
+end if;
+end process;
+
+process(estado)
+begin
+case estado is
+when OFF => alarma<='0';
+when TEMP => alarma<='0';
+when ARM => alarma<='0';
+when ONN => alarma<='1';
+when DES => alarma<='0';
+when others => alarma<='0';
+end case;
+end process;
+
+end behavioral;
