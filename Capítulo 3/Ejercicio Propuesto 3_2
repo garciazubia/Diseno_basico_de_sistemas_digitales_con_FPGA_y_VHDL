@@ -1,0 +1,97 @@
+# Problema 3.2
+# Implementar el mínimo circuito capaz de controlar el comportamiento de varias bombas de agua que controlan el nivel de agua de un depósito 
+# en función de cuatro sensores de nivel SMB, SB, SA, SMA (SMB: muy bajo, SB: bajo, SA: alto y SMA: muy alto). 
+# El depósito se vacía por gravedad a un ritmo que depende de su nivel de llenado. 
+# Si el depósito está muy lleno se vacía a 10 litros por segundo, si está lleno se vacía a 8 litros por segundo, 
+# si está a medio nivel se vacía a 5 litros por segundo, si está algo vacío se vacía a 2 litros por segundo, y si está muy vacío se vacía a 1 litro por segundo.
+
+# La instalación industrial cuenta con bombas que aportan 1 litro por segundo, 2 y 5. La última bomba es más cara que la primera, y se desea que la instalación sea lo más barata posible.
+#TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal SMA: std_logic;
+signal SA: std_logic;
+signal SMB: std_logic;
+signal SB: std_logic;
+signal bomba5a: std_logic;
+signal bomba5b: std_logic;
+signal bomba2: std_logic;
+signal bomba1: std_logic;
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+SMA<=v_sw(3);
+SA<=v_sw(2);
+SB<=v_sw(1);
+SMB<=v_sw(0);
+g_led(3)<=bomba5a;
+g_led(2)<=bomba5b;
+g_led(1)<=bomba2;
+g_led(0)<=bomba1;
+G_HEX0<="1111111";
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+process(SMA, SA, SMB, SB)
+begin
+if SMA='1' and SA='1' and SB='1' and SMB='1' then
+    bomba5a<='1';
+    bomba5b<='1';
+    bomba2<='0';
+    bomba1<='0';
+elsif SMA='0' and SA='1' and SB='1' and SMB='1' then
+    bomba5a<='1';
+    bomba5b<='0';
+    bomba2<='1';
+    bomba1<='1';
+elsif SMA='0' and SA='0' and SB='1' and SMB='1' then
+    bomba5a<='1';
+    bomba5b<='0';
+    bomba2<='0';
+    bomba1<='0';
+elsif SMA='0' and SA='0' and SB='0' and SMB='1' then
+    bomba5a<='0';
+    bomba5b<='0';
+    bomba2<='1';
+    bomba1<='0';
+elsif SMA='0' and SA='0' and SB='0' and SMB='0' then
+    bomba5a<='0';
+    bomba5b<='0';
+    bomba2<='0';
+    bomba1<='1';
+else
+    bomba5a<='-';
+    bomba5b<='-';
+    bomba2<='-';
+    bomba1<='-';
+end if;
+end process;
+
+end Behavioral;
