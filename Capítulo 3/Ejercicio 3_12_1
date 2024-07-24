@@ -1,0 +1,62 @@
+# Ejemplo 3.12. Codificador decimal: dispone de 10 entradas, E9 a E0, y de cuatro salidas que contienen el valor en binario puro de la entrada activada. Opción 1
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal entrada: std_logic_vector (9 downto 0);
+signal salida: std_logic_vector (3 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+entrada<=v_sw(9 downto 0);
+g_led(3 downto 0)<=salida;
+--fin de asignación de signals, entradas y salidas
+
+process(entrada)
+begin
+if entrada(9)='1' then
+    salida<="1001";
+elsif entrada (8)='1' then
+    salida<="1000";
+elsif entrada (7)='1' then
+    salida<="0111";
+elsif entrada (6)='1' then
+    salida<="0110";
+elsif entrada (5)='1' then
+    salida<="0101";
+elsif entrada (4)='1' then
+    salida<="0100";
+elsif entrada (3)='1' then
+    salida<="0011";
+elsif entrada (2)='1' then
+    salida<="0010";
+elsif entrada (1)='1' then
+    salida<="0001";
+else
+    salida<="0000";
+end if;
+end process;
+
+end Behavioral;
