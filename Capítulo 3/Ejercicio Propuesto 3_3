@@ -1,0 +1,115 @@
+# Problema 3.3
+# Una máquina expendedora de golosinas tiene cuatro entradas: dos para el dinero introducido D1-D0 (10 y 5 céntimos de euro) y 
+# dos para seleccionar el producto P1-P0 (11 para pipas, 10 para chicles, 01 para cerillas y 00 para no comprar). 
+# Las pipas cuestan 10 céntimos, el chicle 7 y las cerillas 3. 
+# Implementar el mínimo circuito capaz de visualizar en un display 7-segmentos cuántos céntimos faltan o sobran para el producto elegido.
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal dinero: std_logic_vector (3 downto 0);
+signal g: std_logic;
+signal ch: std_logic;
+signal r: std_logic;
+signal p: std_logic;
+signal lp: std_logic;
+signal ld: std_logic;
+signal seven_seg: std_logic_vector (6 downto 0);
+signal bi: std_logic;
+signal precio: std_logic_vector (3 downto 0);
+signal resta: std_logic_vector (3 downto 0);
+
+--aqui acaban
+begin
+--asignación de signals, entradas y salidas
+dinero<=sw(3 downto 0);
+g<=not(v_bt(3));
+ch<= not(v_bt(2));
+r<= not(v_bt(1));
+p<= not(v_bt(0));
+g_hex0<=seven_seg;
+g_led(0)<=lp;
+g_led(9)<=ld;
+--fin de asignación de signals, entradas y salidas
+
+--comienzan los process
+
+process(g, ch, r, p)
+begin
+if g='1' then
+    precio<="0110";
+elsif ch='1' then
+    precio<="0111";
+elsif r='1' then
+    precio<="1000";
+elsif p='1' then
+    precio<="1001";
+else
+    precio<="0000";
+end if;
+end process;
+
+process(dinero, precio)
+begin
+if precio="0000" then
+    lp<='0';
+    ld<='0';
+    resta<="0000";
+    bi<='1';
+elsif dinero>=precio then
+    lp<='1';
+    ld<='0';
+    resta<=dinero-precio;
+    bi<='0';
+else
+    lp<='0';
+    ld<='1';
+    resta<=precio-dinero;
+    bi<='0';
+end if;
+end process;
+
+process(resta, bi)
+begin
+if bi='1' then
+    seven_seg<="1111111";
+else
+    case resta is
+        when "0000" => seven_seg<="0000001";
+        when "0001" => seven_seg<="1001111";
+        when "0010" => seven_seg<="0010010";
+        when "0011" => seven_seg<="0000110";
+        when "0100" => seven_seg<="1001100";
+        when "0101" => seven_seg<="0100100";
+        when "0110" => seven_seg<="1100000";
+        when "0111" => seven_seg<="0001111";
+        when "1000" => seven_seg<="0000000";
+        when "1001" => seven_seg<="0001100";
+        when others => seven_seg<="-------";
+    end case;
+end if;
+end process;
+
+end Behavioral;
