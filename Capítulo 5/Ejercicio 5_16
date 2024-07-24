@@ -1,0 +1,133 @@
+# Ejercicio 5.16. Implementa un conversor secuencial de binario puro sin signo a BCD. Conversor de 8 bits: de 0 (00000000) a 99 (1100011). 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal clk: std_logic;
+signal inicio: std_logic;
+signal enable: std_logic;
+signal entrada_binaria: std_logic_vector(6 downto 0);
+signal seg_unidades: std_logic_vector(6 downto 0);
+signal seg_decenas: std_logic_vector(6 downto 0);
+signal vector_aux: std_logic_vector (14 downto 0);
+type nombre_estado is (start, desp, suma, fin);
+signal estado: nombre_estado :=start;
+signal cont_bits: integer range 0 to 6;
+signal unidades: std_logic_vector (3 downto 0);
+signal decenas: std_logic_vector (3 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+clk<=G_CLOCK_50;
+inicio<=not(v_bt(0));
+enable<=not(v_bt(3));
+entrada_binaria<=v_sw(6 downto 0);
+g_hex0<=seg_unidades;
+G_HEX1<=seg_decenas;
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+process(clk, inicio, entrada_binaria)
+begin
+if inicio='1' then
+    vector_aux<="00000000"&entrada_binaria;
+    estado<=start;
+    cont_bits<= 0;
+    unidades<="0000";
+    decenas<="0000";
+elsif rising_edge(clk) then
+    case estado is
+    when start =>    cont_bits<=0;
+                    vector_aux<="00000000"&entrada_binaria;
+                    if enable='1' then
+                        estado<=desp;
+                    end if;        
+    when desp =>    cont_bits<=cont_bits+1;
+                    vector_aux<=vector_aux(13 downto 0)&'0';
+                    if cont_bits<6 then
+                        estado<=suma;
+                    else
+                        estado<=fin;
+                    end if;
+    when suma =>    cont_bits<=cont_bits;
+                    if vector_aux(14 downto 11)>4 then
+                        vector_aux(14 downto 11)<=vector_aux(14 downto 11)+"0011";
+                    end if;
+                    if vector_aux(10 downto 7)>4 then
+                        vector_aux(10 downto 7)<=vector_aux(10 downto 7)+"0011";
+                    end if;
+                    estado<=desp;
+    when fin =>    cont_bits<=0;
+                    decenas<=vector_aux(14 downto 11);
+                    unidades<=vector_aux(10 downto 7);
+                    estado<=start;
+    when others => cont_bits<=0;
+                    estado<=start;
+                    decenas<="0000";
+                    unidades<="0000";
+                    vector_aux<="000000000000000";
+    end case;
+end if;
+end process;                                              
+
+process(unidades)
+begin
+case unidades is
+when "0000" => seg_unidades<="0000001";
+when "0001" => seg_unidades<="1001111";
+when "0010" => seg_unidades<="0010010";
+when "0011" => seg_unidades<="0000110";
+when "0100" => seg_unidades<="1001100";
+when "0101" => seg_unidades<="0100100";
+when "0110" => seg_unidades<="0100000";
+when "0111" => seg_unidades<="0001111";
+when "1000" => seg_unidades<="0000000";
+when "1001" => seg_unidades<="0001100";
+when others => seg_unidades<="0110000";
+end case;
+end process;
+
+process(decenas)
+begin
+case decenas is
+when "0000" => seg_decenas<="0000001";
+when "0001" => seg_decenas<="1001111";
+when "0010" => seg_decenas<="0010010";
+when "0011" => seg_decenas<="0000110";
+when "0100" => seg_decenas<="1001100";
+when "0101" => seg_decenas<="0100100";
+when "0110" => seg_decenas<="0100000";
+when "0111" => seg_decenas<="0001111";
+when "1000" => seg_decenas<="0000000";
+when "1001" => seg_decenas<="0001100";
+when others => seg_decenas<="0110000";
+end case;
+end process;
+
+end Behavioral;
