@@ -1,0 +1,45 @@
+# Ejemplo 3.3.2. Dada una entrada bcd, activar un diodo led de herror si la entrada no es BCD. Opción 2. TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal bcd: std_logic_vector (3 downto 0);
+signal herror: std_logic;
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+bcd<=v_sw(3 downto 0);
+g_led(0)<=herror;
+--fin de asignación de signals, entradas y salidas
+
+process(bcd)
+begin
+if bcd > "1001" then
+   herror<='1';
+else
+   herror<='0';
+end if;
+end process;
+
+end Behavioral;
