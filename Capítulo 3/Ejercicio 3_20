@@ -1,0 +1,64 @@
+# Ejemplo 3.20. Implementa una ALU con tres operaciones para dos entradas, a y b, de cuatro bits. 
+# Las cuatro operaciones que generan la salida resultado son: suma (00), xor (01) y mover (10) el contenido de b a la salida 
+# y se controlan mediante dos bits. La ALU además debe entregar el Flag Zeta (FZ): si el resultado de la operación es 0, entonces FZ=1, y FZ=0 en el resto de los casos.
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal a: std_logic_vector(3 downto 0);
+signal b: std_logic_vector(3 downto 0);
+signal sel_alu: std_logic_vector (1 downto 0);
+signal resultado: std_logic_vector (3 downto 0);
+signal flag_z: std_logic;
+
+begin
+--asignación de signals, entradas y salidas
+a<=v_sw(3 downto 0);
+b<=v_sw(9 downto 6);
+sel_alu<=v_sw(5 downto 4);
+g_led(3 downto 0)<=resultado;
+g_led(9)<=flag_z;
+--fin de asignación de signals, entradas y salidas
+
+process(a, b, sel_alu)
+begin
+case sel_alu is
+when "00" => resultado<=a+b;
+when "01" => resultado<=a xor b;
+when "10" => resultado<=b;
+when others => resultado<="0000";
+end case;
+end process;
+
+process(resultado)
+begin
+if resultado=0 then
+    flag_z<='1';
+else
+    flag_z<='0';
+end if;
+end process;
+
+end Behavioral;
+
