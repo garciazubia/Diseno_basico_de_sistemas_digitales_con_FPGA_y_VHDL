@@ -1,0 +1,56 @@
+# Ejemplo 3.8. La entrada nota de 4 bits indica el resultado del examen de un alumno y partir de esta se quiere ver una S, una A o una H según sea la nota entre 0 y 4, 5 y 9 y 10, respectivamente.
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal nota: std_logic_vector(3 downto 0);
+signal siete_seg: std_logic_vector (6 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+nota<=v_sw(3 downto 0);
+g_hex0<=siete_seg;
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+process(nota)
+begin
+case nota is
+when "0000" | "0001" |"0010" |"0011" | "0100" =>
+        siete_seg<=" 0100100";
+when "0101" | "0110" |"0111" |"1000" | "1001" =>
+        siete_seg<="0001000";
+when "1010" => 
+        siete_seg<="0001001";
+when others => 
+        siete_seg<="-------";
+end case;
+end process;
+
+end Behavioral;
