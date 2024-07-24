@@ -1,0 +1,60 @@
+# Ejemplo 3.7. Implementa el circuito mínimo capaz de comparar dos números de dos bits codificados en binario puro con signo en complemento a 2.
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+--use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal a: std_logic_vector(3 downto 0);
+signal b: std_logic_vector(3 downto 0);
+signal mayor: std_logic;
+signal igual: std_logic;
+signal menor: std_logic;
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+a<=v_sw(9 downto 6);
+b<=v_sw(3 downto 0);
+g_led(9)<=mayor;
+g_led(4)<=igual;
+g_led(0)<=menor;
+--fin de asignación de signals, entradas y salidas
+
+process(a, b)
+begin
+if a>b then
+    mayor<='1';
+    igual<='0';
+    menor<='0';
+elsif a<b then
+    mayor<='0';
+    igual<='0';
+    menor<='1';
+else
+    mayor<='0';
+    igual<='1';
+    menor<='0';
+end if;
+end process;
+
+end Behavioral;
