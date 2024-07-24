@@ -1,0 +1,52 @@
+# Ejemplo 4.14. Registro de desplazamiento de 4 bits con recirculación. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (6 downto 0);
+		G_HEX1 : out std_logic_vector (6 downto 0);
+		G_HEX2 : out std_logic_vector (6 downto 0);
+		G_HEX3 : out std_logic_vector (6 downto 0);
+		G_HEX4 : out std_logic_vector (6 downto 0);
+		G_HEX5 : out std_logic_vector (6 downto 0)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal salida: std_logic;
+signal registro: std_logic_vector (3 downto 0) :="0001";
+signal clk: std_logic; 
+signal clear: std_logic;
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+g_led(0)<=salida;
+clk<=G_CLOCK_50;
+clear<=not(v_bt(0));
+--fin de asignación de signals, entradas y salidas
+
+--comienzan los process
+process(clear, clk)
+begin
+if clear='1' then
+    registro<="0001";
+elsif rising_edge(clk) then
+    registro<=registro(2 downto 0)&registro(3);
+end if;
+end process;
+salida<=registro;
+
+end Behavioral;
