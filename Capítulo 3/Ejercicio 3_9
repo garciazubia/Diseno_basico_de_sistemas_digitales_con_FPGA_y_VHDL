@@ -1,0 +1,51 @@
+# Ejemplo 3.9. Implementar un transcodificador de binario puro a BCD. Por ejemplo si la entrada es 1111 (15 en binario puro), 
+# entonces la salida debe ser 0001 0101 (15 en BCD). 
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal entrada: std_logic_vector(3 downto 0);
+signal decenas: std_logic_vector(3 downto 0);
+signal unidades: std_logic_vector(3 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+entrada<=v_sw(3 downto 0);
+g_led(3 downto 0)<=unidades;
+g_led(7 downto 4)<=decenas;
+--fin de asignación de signals, entradas y salidas
+
+process(entrada)
+begin
+if entrada < 10 then
+    decenas<="0000";
+    unidades<=entrada;
+else
+    decenas<="0001";
+    unidades<=entrada-10;
+end if;    
+end process;
+
+end Behavioral;
