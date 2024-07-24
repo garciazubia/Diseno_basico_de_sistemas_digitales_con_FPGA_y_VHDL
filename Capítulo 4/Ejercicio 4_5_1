@@ -1,0 +1,146 @@
+# Ejercicio 4.5. Implementar un reloj de 00 a 59 segundos y añadirle una señal de alarma. Versión 1
+#La hora de alarma se introduce mediante 8 interruptores, así si se mete 0011 0110, entonces la alarma (un led) se activará en el segundo 36. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (6 downto 0);
+		G_HEX1 : out std_logic_vector (6 downto 0);
+		G_HEX2 : out std_logic_vector (6 downto 0);
+		G_HEX3 : out std_logic_vector (6 downto 0);
+		G_HEX4 : out std_logic_vector (6 downto 0);
+		G_HEX5 : out std_logic_vector (6 downto 0)
+		);
+end base;
+
+architecture behavioral of base is
+
+--aqui comienzan las signals
+signal clear: std_logic;
+signal clk: std_logic;
+signal cont_1seg: integer range 0 to 50000000-1;
+signal cont_seg_unidades: integer range 0 to 9;
+signal cont_seg_decenas: integer range 0 to 5;
+signal siete_seg_0: std_logic_vector (6 downto 0);
+signal siete_seg_1: std_logic_vector (6 downto 0);
+signal segundos_alarma: std_logic_vector (7 downto 0);
+signal segundos_decenas_alarma_entero: integer range 0 to 5;
+signal segundos_unidades_alarma_entero: integer range 0 to 9;
+signal alarma: std_logic;
+--aquí acaban
+
+begin
+--asignación de signals, entradas y salidas
+clk<=G_CLOCK_50;
+clear<=not(v_bt(0));
+segundos_alarma<=v_sw(7 downto 0);
+segundos_decenas_alarma_entero<=to_integer(unsigned(segundos_alarma(7 downto 4)));
+segundos_unidades_alarma_entero<=to_integer(unsigned(segundos_alarma(3 downto 0)));
+G_HEX0<=siete_seg_0;
+G_HEX1<=siete_seg_1;
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+g_led(0)<=alarma;
+--fin de asignación de signals, entradas y salidas
+
+process(segundos_unidades_alarma_entero, segundos_decenas_alarma_entero, cont_seg_unidades, cont_seg_decenas)
+begin
+if  (segundos_unidades_alarma_entero=cont_seg_unidades) and
+    (segundos_decenas_alarma_entero=cont_seg_decenas) then
+    alarma<='1';
+else
+    alarma<='0';
+end if;
+end process;
+
+process(clear, clk)
+begin
+if rising_edge(clk) then
+    if clear='1' then  
+        cont_1seg<=0;
+    elsif cont_1seg=50000000-1 then  
+        cont_1seg<=0;
+    else
+        cont_1seg<=cont_1seg+1;
+    end if;
+end if;
+end process;
+
+process(clear, clk)
+begin
+if rising_edge(clk) then
+    if clear='1' then  
+        cont_seg_unidades<=0;
+    else
+        if cont_1seg=50000000-1 then
+            if cont_seg_unidades=9 then
+                cont_seg_unidades<=0;
+            else
+                cont_seg_unidades<=cont_seg_unidades+1;
+            end if;
+         end if;
+    end if;
+end if;	
+end process;
+
+process(clear, clk)
+begin
+if rising_edge(clk) then
+    if clear='1' then  
+        cont_seg_decenas<=0;
+    else
+        if cont_1seg=50000000-1 and cont_seg_unidades=9 then
+            if cont_seg_decenas=5 then
+                cont_seg_decenas<=0;
+            else
+                cont_seg_decenas<=cont_seg_decenas+1;
+            end if;
+        end if;
+    end if;
+end if;	
+end process;
+
+process(cont_seg_unidades)
+begin
+case cont_seg_unidades is
+        when 0 => siete_seg_0<="1000000";
+        when 1 => siete_seg_0<="1111001";
+        when 2 => siete_seg_0<="0100100";
+        when 3 => siete_seg_0<="0110000";
+        when 4 => siete_seg_0<="0011001";
+        when 5 => siete_seg_0<="0010010";
+        when 6 => siete_seg_0<="0000011";
+        when 7 => siete_seg_0<="1111000";
+        when 8 => siete_seg_0<="0000000";
+        when 9 => siete_seg_0<="0011000";
+        when others => siete_seg_0<="0000110";
+end case;
+end process;
+
+process(cont_seg_decenas)
+begin
+case cont_seg_decenas is
+        when 0 => siete_seg_1<="1000000";
+        when 1 => siete_seg_1<="1111001";
+        when 2 => siete_seg_1<="0100100";
+        when 3 => siete_seg_1<="0110000";
+        when 4 => siete_seg_1<="0011001";
+        when 5 => siete_seg_1<="0010010";
+        when others => siete_seg_1<="0000110";
+end case;
+end process;
+
+end behavioral;
