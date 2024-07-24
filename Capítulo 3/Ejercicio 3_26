@@ -1,0 +1,121 @@
+# Ejemplo 3.26. Convertir un número en binario puro de 10 bits a tres dígitos BCD, de 0000 a 1000.
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal entrada: std_logic_vector (9 downto 0);
+signal ent_bp_entero: integer range 0 to 1023;
+signal unidades_sal_entero: integer range 0 to 9;
+signal decenas_sal_entero: integer range 0 to 9;
+signal centenas_sal_entero: integer range 0 to 9;
+signal millares_sal_entero: integer range 0 to 9;
+signal seg_unidades: std_logic_vector (6 downto 0);
+signal seg_decenas: std_logic_vector (6 downto 0);
+signal seg_centenas: std_logic_vector (6 downto 0);
+signal seg_millares: std_logic_vector (6 downto 0);
+
+begin
+--asignación de signals, entradas y salidas
+entrada<=v_sw(9 downto 0);
+g_hex0<=seg_unidades;
+g_hex1<=seg_decenas;
+g_hex2<=seg_centenas;
+g_hex3<=seg_millares;
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+ent_bp_entero<=to_integer(unsigned(ent_bp));
+
+ent_bp_entero<=to_integer(unsigned(ent_bp));
+millares_sal_entero <= (ent_bp_entero/1000);
+centenas_sal_entero <= (ent_bp_entero-millares_sal_entero*1000)/100;
+decenas_sal_entero  <= (ent_bp_entero-millares_sal_entero*1000-
+                        centenas_sal_entero*100)/10;
+unidades_sal_entero <= (ent_bp_entero-millares_sal_entero*1000-
+                        centenas_sal_entero*100-
+                        decenas_sal_entero*10);
+
+process(unidades_sal_entero)
+begin
+case unidades_sal_entero is
+     	when 0 => seg_unidades <= "1000000";
+     	when 1 => seg_unidades <= "1111001";
+     	when 2 => seg_unidades <= "0100100";
+     	when 3 => seg_unidades <= "0110000";
+     	when 4 => seg_unidades <= "0011001";
+     	when 5 => seg_unidades <= "0010010";
+     	when 6 => seg_unidades <= "0000011";
+     	when 7 => seg_unidades <= "1111000";
+     	when 8 => seg_unidades <= "0000000";
+     	when 9 => seg_unidades <= "0011000";
+     	when others => seg_unidades <= "0000110";
+end case;
+end process;
+
+process(decenas_sal_entero)
+begin
+case decenas_sal_entero is
+     	when 0 => seg_decenas <= "1000000";
+     	when 1 => seg_decenas <= "1111001";
+     	when 2 => seg_decenas <= "0100100";
+     	when 3 => seg_decenas <= "0110000";
+     	when 4 => seg_decenas <= "0011001";
+     	when 5 => seg_decenas <= "0010010";
+     	when 6 => seg_decenas <= "0000011";
+     	when 7 => seg_decenas <= "1111000";
+     	when 8 => seg_decenas <= "0000000";
+     	when 9 => seg_decenas <= "0011000";
+     	when others => seg_decenas <= "0000110";
+end case;
+end process;
+
+process(centenas_sal_entero)
+begin
+case centenas_sal_entero is
+     	when 0 => seg_centenas <= "1000000";
+     	when 1 => seg_centenas <= "1111001";
+     	when 2 => seg_centenas <= "0100100";
+     	when 3 => seg_centenas <= "0110000";
+     	when 4 => seg_centenas <= "0011001";
+     	when 5 => seg_centenas <= "0010010";
+     	when 6 => seg_centenas <= "0000011";
+     	when 7 => seg_centenas <= "1111000";
+     	when 8 => seg_centenas <= "0000000";
+     	when 9 => seg_centenas <= "0011000";
+     	when others => seg_centenas <= "0000110";
+end case;
+end process;
+
+process(millares_sal_entero)
+begin
+case millares_sal_entero is
+     	when 0 => seg_millares <= "1000000";
+     	when 1 => seg_millares <= "1111001";
+     	when others => seg_millares <= "0000110";
+end case;
+end process;
+
+
+end Behavioral;
