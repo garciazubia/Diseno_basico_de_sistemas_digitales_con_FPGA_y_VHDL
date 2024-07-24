@@ -1,0 +1,98 @@
+# Problema 3.21
+# Una planta química dispone de dos depósitos de 9 litros A y B para albergar un determinado líquido. 
+# Ambos depósitos cuentan con un sensor que indica el nivel de llenado en litros del mismo mediante un código en BCD (NA, NB respectivamente). 
+# Además, existen dos bombas, una capaz de traspasar líquido del depósito A al B, a la que llamaremos Bomba1 y que se activa mediante la señal de control B1 
+# y la otra que traspasa el líquido del depósito B al A, a la que llamaremos Bomba2 y que se activa a través de la línea de control B2. 
+# Implementa un circuito que busque mantener ambos depósitos al mismo nivel. 
+# Además, se debe mostrar la diferencia en litros existente entre ambos depósitos mediante un display de 7 segmentos. 
+# En la visualización no importa si tiene más líquido A que B, o viceversa.
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal na: std_logic_vector (3 downto 0);
+signal nb: std_logic_vector (3 downto 0);
+signal b1: std_logic;
+signal b2: std_logic;
+signal resta: std_logic_vector (3 downto 0);
+signal seven_seg: std_logic_vector (6 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+na<=v_sw(3 downto 0);
+nb<=v_sw(9 downto 6);
+g_led(9)<=b1;
+g_led(0)<=b2;
+g_hex0<=seven_seg;
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+--comienzan los process
+process(na,nb)
+begin
+if  na>nb then
+    resta<=na-nb;
+else
+    resta<=nb-na;
+end if;
+end process;
+
+process(na, nb)
+begin
+if na>nb then
+    b1<='1';
+    b2<='0';
+elsif na<nb then
+    b1<='0';
+    b2<='1';
+else
+    b1<='0';
+    b2<='0';
+end if;
+end process;
+
+process(resta)
+begin
+    case resta is
+        when "0000" => seven_seg<="0000001";
+        when "0001" => seven_seg<="1001111";
+        when "0010" => seven_seg<="0010010";
+        when "0011" => seven_seg<="0000110";
+        when "0100" => seven_seg<="1001100";
+        when "0101" => seven_seg<="0100100";
+        when "0110" => seven_seg<="1100000";
+        when "0111" => seven_seg<="0001111";
+        when "1000" => seven_seg<="0000000";
+        when "1001" => seven_seg<="0001100";
+        when others => seven_seg<="0110000";
+    end case;
+end process;
+
+end Behavioral;
