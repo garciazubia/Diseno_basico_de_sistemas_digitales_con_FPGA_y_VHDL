@@ -1,0 +1,76 @@
+# Ejemplo 3.14. Dadas dos entradas BCD a y b de 4 bits cada una se desea ver en un display 7-segmentos la mayor de ellas, 
+# pero si al menos una entrada no es BCD, entonces se debe ver una E.
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal a: std_logic_vector (3 downto 0);
+signal b: std_logic_vector (3 downto 0);
+signal mayor: std_logic_vector (3 downto 0);
+signal seg: std_logic_vector (6 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+a<=v_sw(3 downto 0);
+b<=v_sw(9 downto 6);
+g_hex0<=seg;
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+process(a, b)
+begin
+if a > b then
+    mayor<=a;
+else
+    mayor<=b;
+end if;
+end process;
+
+process(a, b, mayor)
+begin
+if (mayor > 9) then
+	seg<="0110000";
+else
+case mayor is
+when "0000" => seg<="0000001";
+when "0001" => seg<="1001111";
+when "0010" => seg<="0010010";
+when "0011" => seg<="0000110";
+when "0100" => seg<="1001100";
+when "0101" => seg<="0100100";
+when "0110" => seg<="0100000";
+when "0111" => seg<="0001111";
+when "1000" => seg<="0000000";
+when "1001" => seg<="0001100";
+when others => seg<="0110000";
+end case;
+end if;
+end process;
+
+end Behavioral;
