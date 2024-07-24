@@ -1,0 +1,101 @@
+# Ejemplo 3.18. Sumador BCD, dados dos entradas a y b en BCD se desea obtener la suma en BCD. 
+# Es decir, si las entradas son 0101 (5) y 0101 (5) la salida debe ser 0000 (0) y el carry_out, 1.
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal a: std_logic_vector(3 downto 0);
+signal b: std_logic_vector(3 downto 0);
+signal decenas_BCD: std_logic_vector(3 downto 0);
+signal unidades_BCD: std_logic_vector(3 downto 0);
+signal a_entero: integer range 0 to 9;
+signal b_entero: integer range 0 to 9;
+signal suma_entero: integer range 0 to 18;
+signal decenas_BCD_entero: integer range 0 to 9;
+signal unidades_BCD_entero: integer range 0 to 9;--aqui acaban
+signal seg_unidades: std_logic_vector (6 downto 0);
+signal seg_decenas: std_logic_vector (6 downto 0);
+
+begin
+--asignación de signals, entradas y salidas
+a<=v_sw(3 downto 0);
+b<=v_sw(9 downto 6);
+g_led(7 downto 4)<=decenas_BCD;
+g_led(3 downto 0)<=unidades_BCD;
+g_hex0<=seg_unidades;
+g_hex1<=seg_decenas;
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+a_entero<=to_integer(unsigned(a));
+b_entero<=to_integer(unsigned(b));
+decenas_BCD<=std_logic_vector(to_unsigned(decenas_BCD_entero, 4));
+unidades_BCD<=std_logic_vector(to_unsigned(unidades_BCD_entero, 4));
+
+process(a_entero, b_entero)
+begin
+suma_entero<=a_entero+b_entero;
+end process;
+
+process(suma_entero)
+begin
+if suma_entero >= 10 then
+    decenas_BCD_entero<=1;
+    unidades_BCD_entero<=suma_entero-10;
+else
+    decenas_BCD_entero<=0;
+    unidades_BCD_entero<=suma_entero;
+end if;
+end process;
+
+process(unidades_BCD)
+begin
+case unidades_BCD is
+     	when "0000" => seg_unidades <= "1000000";
+     	when "0001" => seg_unidades <= "1111001";
+     	when "0010" => seg_unidades <= "0100100";
+     	when "0011" => seg_unidades <= "0110000";
+     	when "0100" => seg_unidades <= "0011001";
+     	when "0101" => seg_unidades <= "0010010";
+     	when "0110" => seg_unidades <= "0000011";
+     	when "0111" => seg_unidades <= "1111000";
+     	when "1000" => seg_unidades <= "0000000";
+     	when "1001" => seg_unidades <= "0011000";
+     	when others => seg_unidades <= "0000110";
+end case;
+end process;
+
+process(decenas_BCD)
+begin
+case decenas_BCD is
+     	when "0000" => seg_decenas <= "1000000";
+     	when "0001" => seg_decenas <= "1111001";
+     	when others => seg_unidades <= "0000110";
+end case;
+end process;
+
+end Behavioral;
