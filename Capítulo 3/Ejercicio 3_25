@@ -1,0 +1,64 @@
+# Ejemplo 3.25. Un proceso industrial entrega dos temperaturas T1 y T2 en BCD y se desea obtener la temperatura global TG.  
+# La temperatura global TG se calcula según el siguiente planteamiento:
+# •	Si T1 y T2 son menores que 5, entonces TG es la temperatura menor de las dos.
+# •	Si T1 y T2 son mayores que 4, entonces TG es la temperatura mayor de las dos.
+# •	En el resto de los casos se debe obtener la temperatura media por defecto.
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (0 to 6);
+		G_HEX1 : out std_logic_vector (0 to 6);
+		G_HEX2 : out std_logic_vector (0 to 6);
+		G_HEX3 : out std_logic_vector (0 to 6);
+		G_HEX4 : out std_logic_vector (0 to 6);
+		G_HEX5 : out std_logic_vector (0 to 6)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal T1: std_logic_vector (3 downto 0);
+signal T2: std_logic_vector (3 downto 0);
+signal TG: std_logic_vector (3 downto 0);
+signal suma: std_logic_vector (3 downto 0);
+
+begin
+--asignación de signals, entradas y salidas
+T1<=v_sw(7 downto 4);
+T2<=v_sw(3 downto 0);
+g_led(3 downto 0)<=TG;
+--fin de asignación de signals, entradas y salidas
+
+suma <= T1 + T2;
+
+process(T1, T2, suma)
+begin
+if T1 <= 4 and T2 <= 4 then
+    if T1<T2 then
+        TG <= T1;
+    else
+        TG <= T2;
+    end if;
+elsif T1>= 5 and T2>= 5 then
+    if T1>T2 then
+        TG <= T1;
+    else
+        TG <= T2;
+    end if;
+else
+    salida <= '0'&suma(3 downto 1);
+end if;
+end process;
+
+end Behavioral;
