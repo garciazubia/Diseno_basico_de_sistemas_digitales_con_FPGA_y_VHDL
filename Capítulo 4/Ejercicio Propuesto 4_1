@@ -1,0 +1,95 @@
+# Problema 4.1. Contador de número primos al ritmo de 1 segundo. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (6 downto 0);
+		G_HEX1 : out std_logic_vector (6 downto 0);
+		G_HEX2 : out std_logic_vector (6 downto 0);
+		G_HEX3 : out std_logic_vector (6 downto 0);
+		G_HEX4 : out std_logic_vector (6 downto 0);
+		G_HEX5 : out std_logic_vector (6 downto 0)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal clear: std_logic;
+signal clk: std_logic;
+signal cont_1_hz: integer range 0 to 50000000;
+signal primos: integer range 0 to 9 :=2;
+signal siete_seg: std_logic_vector (6 downto 0);
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+clear<=not(v_bt(0));
+clk<=G_CLOCK_50; --se debe elegir un solo clk
+G_HEX0<=siete_seg;
+G_HEX1<="1111111";
+G_HEX2<="1111111";
+G_HEX3<="1111111";
+G_HEX4<="1111111";
+G_HEX5<="1111111";
+--fin de asignación de signals, entradas y salidas
+
+--comienzan los process
+process(clk, clear)
+begin
+if clear = '1' then
+    cont_1_hz <= 0;
+elsif rising_edge(clk) then
+    if cont_1_hz = 50000000-1 then
+        cont_1_hz <= 0;
+    else
+        cont_1_hz <= cont_1_hz + 1;
+    end if;
+end if;
+end process;
+
+process(clear, clk)
+begin
+if clear='1' then
+    primos<=2;
+elsif rising_edge(clk) then
+    if cont_1_hz=50000000-1 then
+        case primos is 
+        when 2 => primos<=3;
+        when 3 => primos<=5;
+        when 5 => primos<=7;
+        when 7 => primos<=2;
+        when others => primos<=2;
+        end case;
+    end if;
+end if;
+end process;
+
+process(primos)
+begin
+case primos is
+        when 0 => siete_seg<="1000000";
+        when 1 => siete_seg<="1111001";
+        when 2 => siete_seg<="0100100";
+        when 3 => siete_seg<="0110000";
+        when 4 => siete_seg<="0011001";
+        when 5 => siete_seg<="0010010";
+        when 6 => siete_seg<="0000011";
+        when 7 => siete_seg<="1111000";
+        when 8 => siete_seg<="0000000";
+        when 9 => siete_seg <="0011000";
+        when others => siete_seg <="0000110";
+end case;
+end process;
+
+end Behavioral;
