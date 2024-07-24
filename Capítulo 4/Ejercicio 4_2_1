@@ -1,0 +1,76 @@
+# Ejercicio 4.2. Diseña un semáforo que genere la secuencia verde-amarillo-rojo cada 6-1-3 segundos respectivamente. Opción 1. 
+
+# TESTED
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.numeric_std.all;
+
+entity base is
+	Port (
+		G_CLOCK_50 : in std_logic;
+		V_SW : in std_logic_vector (9 downto 0);
+		V_BT:  in std_logic_vector (3 downto 0);
+		G_LED : out std_logic_vector (9 downto 0);
+		G_HEX0 : out std_logic_vector (6 downto 0);
+		G_HEX1 : out std_logic_vector (6 downto 0);
+		G_HEX2 : out std_logic_vector (6 downto 0);
+		G_HEX3 : out std_logic_vector (6 downto 0);
+		G_HEX4 : out std_logic_vector (6 downto 0);
+		G_HEX5 : out std_logic_vector (6 downto 0)
+		);
+end base;
+
+architecture behavioral of base is
+--aqui comienzan las signals
+signal clk: std_logic;
+signal clear: std_logic;
+signal contador_flancos: integer range 0 to 500000000;
+signal verde: std_logic;
+signal amarillo: std_logic;
+signal rojo: std_logic;
+--aqui acaban
+
+begin
+--asignación de signals, entradas y salidas
+clk<=G_CLOCK_50;
+clear <= not(v_bt(0));
+g_led(9) <= verde;
+g_led(5) <= amarillo;
+g_led(0) <= rojo;
+--fin de asignación de signals, entradas y salidas
+
+--comienzan los process
+process(clk, clear)
+begin
+if clear = '1' then
+    contador_flancos <= 0;
+elsif rising_edge(clk) then
+    if contador_flancos = 500000000-1 then
+        contador_flancos <= 0;
+    else
+        contador_flancos <= contador_flancos + 1;
+    end if;
+end if;
+end process;
+
+process(contador_flancos)
+begin
+if contador_flancos <= 300000000 then
+    verde <= '1';
+    amarillo <= '0';
+    rojo <= '0';
+elsif contador_flancos>300000000 and contador_flancos <= 350000000 then
+    verde <= '0';
+    amarillo <= '1';
+    rojo <= '0';
+else
+    verde <= '0';
+    amarillo <= '0';
+    rojo <= '1';
+end if;
+end process;
+
+end behavioral;
